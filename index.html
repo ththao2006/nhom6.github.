@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111217">
+  <title>trueticket — Discover your next experience</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="announcement">Your next unforgettable experience starts here <span>✦</span></div>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="trueticket trang chủ"><span class="brand-mark">t<span>t</span></span><span>true<span class="brand-light">ticket</span></span></a>
+    <nav class="main-nav" aria-label="Điều hướng chính">
+      <a href="#events">Khám phá</a><a href="#artists">Nghệ sĩ</a><a href="#organizer">Tạo sự kiện</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-button search-shortcut" id="searchShortcut" aria-label="Tìm kiếm">⌕</button>
+      <a class="ticket-link" href="#my-tickets">Vé của tôi <span>↗</span></a>
+      <button class="button button-small button-primary" id="accountButton">Đăng nhập</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Mở menu">☰</button>
+    </div>
+  </header>
+
+  <main id="app">
+    <section class="hero" id="home">
+      <div class="hero-bg"></div>
+      <div class="hero-content">
+        <div class="eyebrow"><span class="live-dot"></span> YOUR CITY. YOUR SCENE.</div>
+        <h1>Make room for<br>the <span>unforgettable.</span></h1>
+        <p>Khám phá những sự kiện đáng mong chờ. Tìm trải nghiệm tiếp theo của bạn cùng trueticket.</p>
+        <div class="hero-actions"><a href="#events" class="button button-primary">Khám phá sự kiện <span>↗</span></a><a href="#organizer" class="button button-ghost">Dành cho nhà tổ chức</a></div>
+        <div class="hero-proof"><div class="avatar-stack"><i>✦</i><i>♫</i><i>●</i></div><span><strong>Live the moment.</strong><br>Keep the memory.</span></div>
+      </div>
+      <div class="hero-side-note"><span>01 / DISCOVER</span><span class="vertical-line"></span><span>LIVE EXPERIENCES</span></div>
+      <div class="hero-bottom"><span>SCROLL TO EXPLORE</span><span>↓</span><span>HANOI · VIETNAM</span></div>
+    </section>
+
+    <section class="search-panel section-wrap" id="searchPanel">
+      <div class="search-intro"><span class="eyebrow">FIND YOUR NEXT MOMENT</span><h2>Đi đâu hôm nay?</h2></div>
+      <form class="search-form" id="filterForm">
+        <label class="search-field"><span>⌕</span><input id="searchInput" type="search" placeholder="Tên sự kiện, nghệ sĩ..." aria-label="Tìm sự kiện"></label>
+        <label class="filter-field"><span>Thể loại</span><select id="genreFilter"><option value="">Tất cả thể loại</option><option>Âm nhạc</option><option>Festival</option><option>Workshop</option><option>Nghệ thuật</option><option>Thể thao</option></select></label>
+        <label class="filter-field"><span>Địa điểm</span><select id="locationFilter"><option value="">Mọi địa điểm</option><option>Hà Nội</option><option>TP. Hồ Chí Minh</option><option>Đà Nẵng</option></select></label>
+        <label class="filter-field"><span>Giá vé</span><select id="priceFilter"><option value="">Tất cả</option><option value="free">Miễn phí</option><option value="paid">Có phí</option></select></label>
+        <button class="button button-primary search-submit" type="submit">Tìm kiếm <span>→</span></button>
+      </form>
+    </section>
+
+    <section class="section-wrap section-block" id="events">
+      <div class="section-heading"><div><span class="eyebrow">CURATED FOR YOU</span><h2>Sự kiện <span class="muted">nổi bật.</span></h2></div><a class="text-link" href="#all-events">Xem tất cả <span>↗</span></a></div>
+      <div class="category-row" id="categoryRow">
+        <button class="category-chip active" data-category="">Tất cả</button><button class="category-chip" data-category="Âm nhạc">Âm nhạc</button><button class="category-chip" data-category="Festival">Festival</button><button class="category-chip" data-category="Workshop">Workshop</button><button class="category-chip" data-category="Nghệ thuật">Nghệ thuật</button>
+      </div>
+      <div class="event-grid" id="eventGrid"></div>
+      <div class="empty-state hidden" id="emptyEvents"><span>◌</span><h3>Chưa tìm thấy sự kiện</h3><p>Thử thay đổi từ khóa hoặc bộ lọc nhé.</p><button class="button button-secondary" id="resetFilters">Xóa bộ lọc</button></div>
+    </section>
+
+    <section class="feature-band">
+      <div class="feature-image"></div><div class="feature-copy"><span class="eyebrow">NOT JUST AN EVENT</span><h2>Moments worth<br><span>showing up for.</span></h2><p>Từ những đêm nhạc bùng nổ đến workshop truyền cảm hứng — tìm điều khiến bạn háo hức bước ra khỏi nhà.</p><a href="#events" class="button button-primary">Tìm trải nghiệm của bạn <span>↗</span></a></div>
+      <div class="feature-index">TT / 2026</div>
+    </section>
+
+    <section class="section-wrap section-block" id="artists">
+      <div class="section-heading"><div><span class="eyebrow">THE PEOPLE BEHIND THE MOMENT</span><h2>Spotlight <span class="muted">artists.</span></h2></div><span class="small-note">Những gương mặt góp mặt trong các sự kiện</span></div>
+      <div class="artist-grid" id="artistGrid"></div>
+    </section>
+
+    <section class="organizer-cta" id="organizer">
+      <div><span class="eyebrow">FOR EVENT ORGANIZERS</span><h2>Make it happen.<br><span>We'll bring the crowd.</span></h2><p>Tạo sự kiện, quản lý vé và theo dõi hiệu quả trên cùng một nền tảng.</p></div>
+      <div class="organizer-cta-action"><a href="#organizer-dashboard" class="button button-light">Bắt đầu tạo sự kiện <span>↗</span></a><span class="small-note">Dành cho BTC · Bản demo</span></div>
+    </section>
+    <footer class="site-footer"><div class="footer-top"><a class="brand" href="#home"><span class="brand-mark">t<span>t</span></span><span>true<span class="brand-light">ticket</span></span></a><p>Discover your next experience.</p><a href="#home" class="back-top">Back to top ↑</a></div><div class="footer-bottom"><span>© 2026 trueticket. Student project demo.</span><span>Made for the moments that matter.</span></div></footer>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop hidden" id="modalBackdrop">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Đóng">×</button><div id="modalContent"></div>
+    </section>
+  </div>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
