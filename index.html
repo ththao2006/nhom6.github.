@@ -153,69 +153,36 @@
     </section>
 
     <!-- BỘ LỌC SỰ KIỆN -->
-    <section
-      class="search-panel section-wrap"
-      id="searchPanel"
-    >
+    
+<!-- Bộ lọc ẩn: giữ lại để tương thích với app.js -->
+<section id="searchPanel" class="hidden" aria-hidden="true">
+  <form id="filterForm">
+    <input id="searchInput" type="search">
 
-      <div class="search-intro">
-        <span class="eyebrow">FIND YOUR NEXT MOMENT</span>
-        <h2>Tìm sự kiện phù hợp</h2>
-      </div>
+    <select id="genreFilter">
+      <option value="">Tất cả thể loại</option>
+      <option>Âm nhạc</option>
+      <option>Festival</option>
+      <option>Workshop</option>
+      <option>Nghệ thuật</option>
+      <option>Thể thao</option>
+    </select>
 
-      <form class="search-form" id="filterForm">
+    <select id="locationFilter">
+      <option value="">Mọi địa điểm</option>
+      <option>Hà Nội</option>
+      <option>TP. Hồ Chí Minh</option>
+      <option>Đà Nẵng</option>
+    </select>
 
-        <label class="search-field">
-          <span>⌕</span>
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Tên sự kiện, nghệ sĩ..."
-            aria-label="Tìm sự kiện"
-          >
-        </label>
+    <select id="priceFilter">
+      <option value="">Tất cả</option>
+      <option value="free">Miễn phí</option>
+      <option value="paid">Có phí</option>
+    </select>
+  </form>
+</section>
 
-        <label class="filter-field">
-          <span>Thể loại</span>
-          <select id="genreFilter">
-            <option value="">Tất cả thể loại</option>
-            <option>Âm nhạc</option>
-            <option>Festival</option>
-            <option>Workshop</option>
-            <option>Nghệ thuật</option>
-            <option>Thể thao</option>
-          </select>
-        </label>
-
-        <label class="filter-field">
-          <span>Địa điểm</span>
-          <select id="locationFilter">
-            <option value="">Mọi địa điểm</option>
-            <option>Hà Nội</option>
-            <option>TP. Hồ Chí Minh</option>
-            <option>Đà Nẵng</option>
-          </select>
-        </label>
-
-        <label class="filter-field">
-          <span>Giá vé</span>
-          <select id="priceFilter">
-            <option value="">Tất cả</option>
-            <option value="free">Miễn phí</option>
-            <option value="paid">Có phí</option>
-          </select>
-        </label>
-
-        <button
-          class="button button-primary search-submit"
-          type="submit"
-        >
-          Tìm kiếm <span>→</span>
-        </button>
-
-      </form>
-
-    </section>
 
     <!-- DANH SÁCH SỰ KIỆN -->
     <section
