@@ -291,3 +291,102 @@ button{cursor:pointer}
   .seat-row{gap:4px}
   .stage{width:90%}
 }
+/* ===== TICKETBOX HEADER ===== */
+
+/* Ẩn thanh thông báo cũ */
+.announcement {
+  display: none !important;
+}
+
+/* Thanh menu chính màu xanh */
+.site-header {
+  background: #28c77a;
+  border-bottom: none;
+  backdrop-filter: none;
+  height: 82px;
+}
+
+/* Logo chữ trắng */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  color: #ffffff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 39px;
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Ẩn biểu tượng logo cũ nếu còn */
+.brand-mark {
+  display: none;
+}
+
+.brand-light {
+  color: #ffffff;
+  font-weight: 900;
+}
+
+/* Menu và nút bên phải */
+.main-nav a,
+.ticket-link {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.main-nav a:hover,
+.ticket-link:hover {
+  color: #103c29;
+}
+
+.ticket-link span {
+  color: #ffffff;
+}
+
+.icon-button,
+.menu-toggle {
+  color: #ffffff;
+}
+
+/* Nút đăng nhập trên thanh xanh */
+.site-header .button-primary {
+  background: #ffffff;
+  color: #158b55;
+  border-color: #ffffff;
+}
+
+.site-header .button-primary:hover {
+  background: #e8fff2;
+  color: #107548;
+}
+
+/* Responsive */
+@media (max-width: 650px) {
+  .site-header {
+    height: 70px;
+    padding: 0 5%;
+  }
+
+  .brand {
+    font-size: 30px;
+  }
+
+  .main-nav {
+    top: 70px;
+    background: #28c77a;
+    border-bottom: 1px solid #ffffff30;
+  }
+
+  .main-nav a {
+    color: #ffffff;
+  }
+
+  .menu-toggle {
+    color: #ffffff;
+  }
+}
