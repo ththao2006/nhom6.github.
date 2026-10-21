@@ -1969,3 +1969,13 @@ button {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Ẩn hoàn toàn bộ tìm kiếm cũ bên dưới slider */
+#searchPanel {
+  display: none !important;
+}
+
+/* Đưa danh sách sự kiện lên gần slider hơn */
+#events {
+  padding-top: 45px;
+}
