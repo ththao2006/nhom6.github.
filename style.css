@@ -1979,3 +1979,28 @@ button {
 #events {
   padding-top: 45px;
 }
+
+/* =========================================
+   THU GỌN KHOẢNG CÁCH SLIDER VÀ SỰ KIỆN
+========================================= */
+
+/* Giảm khoảng trống dưới slider */
+.home-showcase {
+  padding-bottom: 12px;
+}
+
+/* Đẩy phần Sự kiện nổi bật lên cao */
+#events {
+  padding-top: 18px;
+}
+
+/* Thu gọn trên điện thoại */
+@media (max-width: 650px) {
+  .home-showcase {
+    padding-bottom: 8px;
+  }
+
+  #events {
+    padding-top: 16px;
+  }
+}
