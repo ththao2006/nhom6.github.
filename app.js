@@ -118,10 +118,320 @@
   $("#modalClose").onclick=closeModal;$("#modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("#modalBackdrop"))closeModal();});
   document.addEventListener("keydown",ev=>{if(ev.key==="Escape")closeModal();if(ev.key==="Enter"&&ev.target.matches("[data-open-event]"))openEvent(ev.target.dataset.openEvent);});
   $("#accountButton").onclick=()=>{if(user){modal(`<span class="eyebrow">YOUR ACCOUNT</span><h2>${user.name}</h2><p>${user.email}</p><span class="pill">Vai trò: ${user.role}</span><button class="button button-primary full" id="accountTickets">Vé của tôi</button>${user.role==="organizer"?'<button class="button button-secondary full" id="accountOrganizer">Quản lý sự kiện</button>':""}${user.role==="admin"?'<button class="button button-secondary full" id="accountAdmin">Quản trị</button>':""}<button class="button button-secondary full" id="logoutButton">Đăng xuất</button>`);$("#accountTickets").onclick=openTickets;if($("#accountOrganizer"))$("#accountOrganizer").onclick=openOrganizer;if($("#accountAdmin"))$("#accountAdmin").onclick=openAdmin;$("#logoutButton").onclick=()=>{user=null;save();closeModal();$("#accountButton").textContent="Đăng nhập";toast("Đã đăng xuất.");};}else openLogin();};
-  $("#searchShortcut").onclick=()=>{$("#searchInput").focus();$("#searchPanel").scrollIntoView({behavior:"smooth"});};
   $("#menuToggle").onclick=()=>$(".main-nav").classList.toggle("open");
   $$(".main-nav a").forEach(a=>a.addEventListener("click",()=>$(".main-nav").classList.remove("open")));
   $("#app").addEventListener("click",ev=>{const a=ev.target.closest('a[href="#organizer-dashboard"]');if(a){ev.preventDefault();openOrganizer();}const ticketsLink=ev.target.closest('a[href="#my-tickets"]');if(ticketsLink){ev.preventDefault();openTickets();}});
   function routeHash(){const h=location.hash;if(h.startsWith("#event-"))openEvent(h.slice(7));else if(h==="#organizer-dashboard")openOrganizer();else if(h==="#admin-dashboard")openAdmin();else if(h==="#my-tickets")openTickets();}
-  renderEvents();renderArtists();if(user)$("#accountButton").textContent="Tài khoản";routeHash();
+ 
+  // =========================================
+  // FEATURED EVENTS SLIDER
+  // 2 posters on desktop, 1 on mobile
+  // =========================================
+
+  const featuredTrack = $("#sliderTrack");
+  const featuredDots = $("#sliderDots");
+  const featuredSlider = $("#featuredSlider");
+
+  let featuredPage = 0;
+  let featuredTimer = null;
+
+  // Lấy các sự kiện sắp diễn ra
+  function featuredEvents() {
+    return events
+      .filter(e =>
+        eventStatus(e) === "upcoming" &&
+        e.status !== "hidden" &&
+        Array.isArray(e.ticketTypes) &&
+e.ticketTypes.some(t => t.quantity > 0)
+      )
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  // Máy tính: 2 poster, điện thoại: 1 poster
+  function featuredPerPage() {
+    return window.matchMedia("(max-width: 650px)").matches
+      ? 1
+      : 2;
+  }
+
+  function renderFeatured() {
+    const list = featuredEvents();
+    const perPage = featuredPerPage();
+
+    const pageCount = Math.max(
+      1,
+      Math.ceil(list.length / perPage)
+    );
+
+    featuredPage =
+      ((featuredPage % pageCount) + pageCount) % pageCount;
+
+    const start = featuredPage * perPage;
+    const shown = list.slice(start, start + perPage);
+
+    if (shown.length === 0) {
+      featuredTrack.innerHTML = `
+        <div class="slider-empty">
+          Hiện chưa có sự kiện sắp diễn ra.
+        </div>
+      `;
+    } else {
+      featuredTrack.innerHTML = shown.map(e => `
+        <article
+          class="slider-card"
+          data-featured-event="${e.id}"
+          tabindex="0"
+          role="button"
+          aria-label="Xem chi tiết ${e.title}"
+        >
+          <img
+            class="slider-card-image"
+            src="${e.image}"
+            alt="Poster ${e.title}"
+            loading="lazy"
+          >
+
+          <div class="slider-card-content">
+
+            <span class="slider-card-category">
+              ${e.genre}
+            </span>
+
+            <h2>${e.title}</h2>
+
+            <div class="slider-card-meta">
+              ◷ ${dateText(e.date)} · ${e.time || "19:00"}
+              <span> · </span>
+              ⌖ ${e.location}
+            </div>
+
+            <div class="slider-card-bottom">
+
+              <span class="slider-card-price">
+                ${money(e.price)}
+              </span>
+
+              <button
+                type="button"
+                class="slider-card-button"
+                data-featured-event="${e.id}"
+              >
+                Xem chi tiết ↗
+              </button>
+
+            </div>
+
+          </div>
+        </article>
+      `).join("");
+    }
+
+    // Tạo các chấm điều hướng
+    featuredDots.innerHTML = Array.from(
+      { length: pageCount },
+      (_, i) => `
+        <button
+          type="button"
+          class="slider-dot ${i === featuredPage ? "active" : ""}"
+          data-slide-page="${i}"
+          aria-label="Trang ${i + 1}"
+          ${i === featuredPage ? 'aria-current="true"' : ""}
+        ></button>
+      `
+    ).join("");
+
+    // Ẩn nút điều hướng nếu chỉ có một trang
+    $("#sliderPrev").hidden = pageCount <= 1;
+    $("#sliderNext").hidden = pageCount <= 1;
+  }
+
+  // Chuyển trang slider
+  function shiftFeatured(step) {
+    featuredPage += step;
+    renderFeatured();
+  }
+
+  // Tự động chuyển mỗi 5 giây
+  function startFeaturedAuto() {
+    clearInterval(featuredTimer);
+
+    const enoughEvents =
+      featuredEvents().length > featuredPerPage();
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (enoughEvents && !reducedMotion) {
+      featuredTimer = setInterval(() => {
+        shiftFeatured(1);
+      }, 5000);
+    }
+  }
+
+  // Nút trái
+  $("#sliderPrev").addEventListener("click", () => {
+    shiftFeatured(-1);
+    startFeaturedAuto();
+  });
+
+  // Nút phải
+  $("#sliderNext").addEventListener("click", () => {
+    shiftFeatured(1);
+    startFeaturedAuto();
+  });
+
+  // Bấm chấm điều hướng
+  featuredDots.addEventListener("click", ev => {
+    const button = ev.target.closest("[data-slide-page]");
+
+    if (!button) return;
+
+    featuredPage = Number(button.dataset.slidePage);
+
+    renderFeatured();
+    startFeaturedAuto();
+  });
+
+  // Bấm poster hoặc nút xem chi tiết
+  featuredTrack.addEventListener("click", ev => {
+    const card = ev.target.closest(
+      "[data-featured-event]"
+    );
+
+    if (!card) return;
+
+    openEvent(card.dataset.featuredEvent);
+  });
+
+  // Hỗ trợ mở sự kiện bằng bàn phím
+  featuredTrack.addEventListener("keydown", ev => {
+    if (
+      (ev.key === "Enter" || ev.key === " ") &&
+      ev.target.matches(".slider-card")
+    ) {
+      ev.preventDefault();
+      openEvent(ev.target.dataset.featuredEvent);
+    }
+  });
+
+  // Dừng tự chạy khi rê chuột vào slider
+  featuredSlider.addEventListener("mouseenter", () => {
+    clearInterval(featuredTimer);
+  });
+
+  // Chạy tiếp khi rời chuột
+  featuredSlider.addEventListener(
+    "mouseleave",
+    startFeaturedAuto
+  );
+
+  // Dừng khi đang thao tác bằng bàn phím
+  featuredSlider.addEventListener("focusin", () => {
+    clearInterval(featuredTimer);
+  });
+
+  featuredSlider.addEventListener("focusout", ev => {
+    if (!featuredSlider.contains(ev.relatedTarget)) {
+      startFeaturedAuto();
+    }
+  });
+
+  // Cập nhật khi đổi kích thước màn hình
+  let previousPerPage = featuredPerPage();
+
+  window.addEventListener("resize", () => {
+    const nextPerPage = featuredPerPage();
+
+    if (nextPerPage !== previousPerPage) {
+      featuredPage = 0;
+      previousPerPage = nextPerPage;
+
+      renderFeatured();
+      startFeaturedAuto();
+    }
+  });
+
+  // =========================================
+  // HEADER SEARCH
+  // =========================================
+
+  const headerSearchInput = $("#headerSearchInput");
+  const mainSearchInput = $("#searchInput");
+
+  // Gõ ở header -> lọc sự kiện
+  headerSearchInput.addEventListener("input", () => {
+    mainSearchInput.value = headerSearchInput.value;
+    renderEvents();
+  });
+
+  // Gõ ở bộ lọc -> đồng bộ header
+  mainSearchInput.addEventListener("input", () => {
+    headerSearchInput.value = mainSearchInput.value;
+  });
+
+  // Enter trong ô tìm kiếm header
+  headerSearchInput.addEventListener("keydown", ev => {
+    if (ev.key !== "Enter") return;
+
+    ev.preventDefault();
+
+    mainSearchInput.value = headerSearchInput.value;
+    renderEvents();
+
+    location.hash = "#events";
+
+    $("#events").scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  });
+
+  // Nút tìm kiếm trên header
+  $("#searchShortcut").addEventListener("click", () => {
+    headerSearchInput.focus();
+  });
+
+  // =========================================
+  // HOME CATEGORY LINKS
+  // =========================================
+
+  $$("[data-home-category]").forEach(link => {
+    link.addEventListener("click", () => {
+      const category = link.dataset.homeCategory;
+
+      activeCategory = category;
+
+      // Đồng bộ bộ lọc thể loại
+      $("#genreFilter").value = category;
+
+      // Đồng bộ nút danh mục đang chọn
+      $$(".category-chip").forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.category === category
+        );
+      });
+
+      renderEvents();
+    });
+  });
+
+  // =========================================
+  // INITIALIZE
+  // =========================================
+
+  renderFeatured();
+  startFeaturedAuto();
+
+  renderEvents();
+  renderArtists();
+
+  if (user) {
+    $("#accountButton").textContent = "Tài khoản";
+  }
+
+  routeHash();
+
 })();
+
