@@ -329,7 +329,7 @@
       ),
       ticketTypes,
       active: true,
-      status: "upcoming",
+      status: "pending",
       createdAt: new Date().toISOString()
     };
 
