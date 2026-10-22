@@ -205,8 +205,7 @@ function renderEvents() {
     const toggle=ev.target.closest("[data-toggle-event]");if(toggle){const e=events.find(x=>x.id===toggle.dataset.toggleEvent);e.status=e.status==="hidden"?"upcoming":"hidden";save();openAdmin();toast("Đã cập nhật trạng thái sự kiện.");return;}
   }
   $("#filterForm").addEventListener("submit",ev=>{ev.preventDefault();renderEvents();location.hash="#events";});
-  $("#searchInput").addEventListener("input",renderEvents);$("#genreFilter").addEventListener("change",renderEvents);$("#locationFilter").addEventListener("change",renderEvents);$("#priceFilter").addEventListener("change",renderEvents);
-  
+$("#searchInput").addEventListener("input", renderEvents);  
 ["genreFilter", "locationFilter", "priceFilter", "timeFilter"]
   .forEach(id => {
     $("#" + id).addEventListener("change", () => {
@@ -524,6 +523,7 @@ e.ticketTypes.some(t => t.quantity > 0)
   // =========================================
 
   
+
 $$("[data-home-category]").forEach(link => {
   link.addEventListener("click", () => {
     const category = link.dataset.homeCategory;
@@ -531,7 +531,7 @@ $$("[data-home-category]").forEach(link => {
     // Lưu thể loại đã chọn
     activeCategory = category;
 
-    // Đồng bộ dropdown Thể loại
+    // Đồng bộ dropdown thể loại
     $("#genreFilter").value = category;
 
     // Lọc lại danh sách sự kiện
@@ -539,14 +539,9 @@ $$("[data-home-category]").forEach(link => {
   });
 });
 
-
-      renderEvents();
-    });
-  });
-
-  // =========================================
-  // INITIALIZE
-  // =========================================
+// =========================================
+// INITIALIZE
+// =========================================
 
   renderFeatured();
   startFeaturedAuto();
