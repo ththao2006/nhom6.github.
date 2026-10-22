@@ -1,205 +1,407 @@
 
 (() => {
-  const list = document.getElementById("ticketList");
-  const modal = document.getElementById("ticketModal");
+  "use strict";
 
-  const money = n =>
-    new Intl.NumberFormat("vi-VN").format(n) + " đ";
+  const $ = id => document.getElementById(id);
 
-  let orders = [];
-  let events = window.TT_SEED_EVENTS || [];
+  const list = $("ticketList");
+  const modal = $("ticketModal");
+  const modalEvent = $("modalEvent");
+  const modalTicket = $("modalTicket");
+  const modalOrder = $("modalOrder");
+  const ticketQR = $("ticketQR");
+  const closeModal = $("closeModal");
 
-  try {
-    const savedOrders = JSON.parse(
-      localStorage.getItem("tt_orders") || "[]"
-    );
-    if (Array.isArray(savedOrders)) orders = savedOrders;
+  if (!list) return;
 
-    const savedEvents = JSON.parse(
-      localStorage.getItem("tt_events") || "null"
-    );
-    if (Array.isArray(savedEvents)) events = savedEvents;
-  } catch (error) {
-    console.warn("Không đọc được dữ liệu:", error);
+  const auth = window.TT_AUTH;
+  const ticketCore = window.TT_TICKETS;
+
+  const normalize = value => String(value ?? "");
+
+  const money = value =>
+    new Intl.NumberFormat("vi-VN").format(
+      Number(value) || 0
+    ) + " đ";
+
+  function readArray(key) {
+    try {
+      const data = JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
   }
 
-  // Chỉ hiện đơn hàng demo đã thanh toán
-const currentUser =
-  window.TT_AUTH?.getCurrentUser?.() || null;
+  function getUser() {
+    const user = auth?.getCurrentUser?.();
 
-if (
-  !currentUser ||
-  !currentUser.verified ||
-  !currentUser.verifiedIdentityId
-) {
-  list.innerHTML = `
-    <div class="empty">
-      <h2>Vui lòng đăng nhập và xác minh eKYC</h2>
-      <p class="muted">
-        Bạn cần xác minh danh tính để xem vé của mình.
-      </p>
-      <a
-        href="auth.html?return=my-tickets.html"
-        class="button primary"
-      >
-        Đăng nhập / Xác minh eKYC
-      </a>
-    </div>
-  `;
-  return;
-}
+    if (
+      !user ||
+      !user.verified ||
+      !user.verifiedIdentityId
+    ) {
+      return null;
+    }
 
-const paidOrders = orders
-  .filter(order =>
-    order.status === "paid" &&
-    order.buyer?.userId === currentUser.id &&
-    order.buyer?.verifiedIdentityId ===
-      currentUser.verifiedIdentityId
-  )
-  .reverse();
-
-  if (paidOrders.length === 0) {
-    list.innerHTML = `
-      <div class="empty">
-        <h2>Bạn chưa có vé nào</h2>
-        <p class="muted">
-          Hãy khám phá sự kiện và đặt vé đầu tiên!
-        </p>
-        <a href="index.html" class="button primary">
-          Khám phá sự kiện
-        </a>
-      </div>
-    `;
-    return;
+    return user;
   }
 
-  list.replaceChildren();
+  function getEvents() {
+    const map = new Map();
 
-  paidOrders.forEach(order => {
-    const event = events.find(e => e.id === order.eventId);
-
-    const card = document.createElement("article");
-    card.className = "ticket-card";
-
-    const top = document.createElement("div");
-    top.className = "ticket-top";
-
-    const image = document.createElement("img");
-    image.className = "ticket-image";
-    image.alt = "Ảnh sự kiện";
-    if (event?.image) image.src = event.image;
-
-    const info = document.createElement("div");
-    info.className = "ticket-info";
-
-    const title = document.createElement("h2");
-    title.textContent = order.eventTitle || "Sự kiện";
-
-    const date = document.createElement("p");
-    date.textContent = event
-      ? "📅 " + event.date + " · " + (event.time || "")
-      : "Không có thông tin ngày";
-
-    const venue = document.createElement("p");
-    venue.textContent = event
-      ? "📍 " + event.venue + " · " + event.location
-      : "";
-
-    const types = document.createElement("p");
-    types.textContent = (order.items || [])
-      .map(t => t.name + " × " + t.quantity)
-      .join(" · ");
-
-    const status = document.createElement("span");
-    status.className = "status";
-    status.textContent = "Đã thanh toán (demo)";
-
-    info.append(title, date, venue, types, status);
-    top.append(image, info);
-
-    const bottom = document.createElement("div");
-    bottom.className = "ticket-bottom";
-
-    const summary = document.createElement("div");
-
-    const code = document.createElement("div");
-    code.className = "muted";
-    code.textContent = "Mã đơn: " + order.id;
-
-    const price = document.createElement("div");
-    price.className = "price";
-    price.textContent = money(order.total || 0);
-
-    summary.append(code, price);
-
-    const actions = document.createElement("div");
-
-    const view = document.createElement("button");
-    view.className = "button primary";
-    view.textContent = "Xem vé / QR";
-    view.addEventListener("click", () => openTicket(order));
-
-    const resale = document.createElement("button");
-    resale.className = "button";
-    resale.textContent = "Bán lại vé";
-   resale.addEventListener("click", () => {
-  window.location.href = "resale.html";
-});
-
-    actions.append(view, resale);
-    bottom.append(summary, actions);
-
-    card.append(top, bottom);
-    list.appendChild(card);
-  });
-
-  function openTicket(order) {
-    document.getElementById("modalEvent").textContent =
-      order.eventTitle;
-
-    document.getElementById("modalTicket").textContent =
-      (order.items || [])
-        .map(t => t.name + " × " + t.quantity)
-        .join(" · ");
-
-    document.getElementById("modalOrder").textContent =
-      "Mã đơn hàng: " + order.id;
-
-    // QR trang trí, không phải QR check-in thực tế.
-    document.getElementById("ticketQR").innerHTML = `
-      <svg viewBox="0 0 100 100"
-           xmlns="http://www.w3.org/2000/svg">
-        <rect width="100" height="100" fill="white"/>
-        <g fill="#111">
-          <path d="M3 3h30v30H3zM67 3h30v30H67zM3 67h30v30H3z"/>
-          <path d="M9 9h18v18H9zM73 9h18v18H73zM9 73h18v18H9z"
-                fill="white"/>
-          <path d="M14 14h8v8h-8zM78 14h8v8h-8zM14 78h8v8h-8z"/>
-          <path d="M40 5h7v7h-7zM52 5h8v8h-8z
-                   M39 20h9v9h-9zM53 24h9v7h-9z
-                   M40 39h12v12H40zM58 40h8v8h-8z
-                   M72 40h9v9h-9zM87 40h8v8h-8z
-                   M5 40h9v9H5zM20 40h9v9h-9z
-                   M5 54h8v8H5zM20 55h11v7H20z
-                   M39 60h9v9h-9zM55 57h8v8h-8z
-                   M70 57h9v9h-9zM85 57h10v8H85z
-                   M40 77h10v8H40zM56 72h9v10h-9z
-                   M72 76h10v9H72zM88 86h9v9h-9z"/>
-        </g>
-      </svg>
-    `;
-
-    modal.classList.add("open");
-  }
-
-  document.getElementById("closeModal")
-    .addEventListener("click", () => {
-      modal.classList.remove("open");
+    (window.TT_SEED_EVENTS || []).forEach(event => {
+      if (event?.id != null) {
+        map.set(normalize(event.id), event);
+      }
     });
 
-  modal.addEventListener("click", e => {
-    if (e.target === modal) {
+    readArray("tt_events").forEach(event => {
+      if (event?.id != null) {
+        map.set(normalize(event.id), event);
+      }
+    });
+
+    return [...map.values()];
+  }
+
+  function findEvent(eventId) {
+    return getEvents().find(
+      event => normalize(event.id) === normalize(eventId)
+    ) || null;
+  }
+
+  function getOrders() {
+    return readArray("tt_orders");
+  }
+
+  // Đồng bộ những đơn mua vé gốc từ trước.
+  // Không tạo vé mới từ đơn mua lại.
+  function syncOldOrders() {
+    if (!ticketCore?.createFromOrder) return;
+
+    const listings = readArray("tt_resales");
+
+    getOrders().forEach(order => {
+      if (order.status !== "paid") return;
+      if (order.type === "resale") return;
+
+      if (
+        !order.id ||
+        !order.buyer?.userId ||
+        !order.buyer?.verifiedIdentityId ||
+        !Array.isArray(order.items)
+      ) {
+        return;
+      }
+
+      const hasLegacySold = listings.some(item =>
+        normalize(item.orderId) === normalize(order.id) &&
+        item.status === "sold" &&
+        !item.unitKey
+      );
+
+      if (hasLegacySold) return;
+
+      ticketCore.createFromOrder(order);
+    });
+  }
+
+  function getMyTickets() {
+    const user = getUser();
+
+    if (!user || !ticketCore?.getMine) return [];
+
+    return ticketCore.getMine(user);
+  }
+
+  function statusLabel(ticket) {
+    if (ticket.status === "used") {
+      return "Đã check-in";
+    }
+
+    if (ticket.status === "valid") {
+      return "Vé hợp lệ";
+    }
+
+    return "Không còn hiệu lực";
+  }
+
+  function createText(tag, content, className = "") {
+    const element = document.createElement(tag);
+
+    element.textContent = content;
+
+    if (className) {
+      element.className = className;
+    }
+
+    return element;
+  }
+
+  function showEmpty(title, description, login = false) {
+    list.replaceChildren();
+
+    const box = document.createElement("div");
+    box.className = "empty";
+
+    box.append(
+      createText("h2", title),
+      createText("p", description, "muted")
+    );
+
+    if (login) {
+      const link = document.createElement("a");
+
+      link.href =
+        "auth.html?return=" +
+        encodeURIComponent("my-tickets.html");
+
+      link.className = "button primary";
+      link.textContent = "Đăng nhập / Xác minh eKYC";
+
+      box.appendChild(link);
+    }
+
+    list.appendChild(box);
+  }
+
+  function showTicketModal(ticket) {
+    const user = getUser();
+
+    if (!user) {
+      alert("Vui lòng đăng nhập lại.");
+      return;
+    }
+
+    // Luôn lấy dữ liệu mới nhất.
+    const currentTicket = getMyTickets().find(
+      item => item.id === ticket.id
+    );
+
+    if (!currentTicket) {
+      alert("Bạn không còn sở hữu vé này.");
+      renderTickets();
+      return;
+    }
+
+    if (currentTicket.status !== "valid") {
+      alert("Vé này không còn hiệu lực để check-in.");
+      renderTickets();
+      return;
+    }
+
+    const event = findEvent(currentTicket.eventId);
+
+    modalEvent.textContent =
+      event?.title ||
+      currentTicket.eventTitle ||
+      "Sự kiện";
+
+    modalTicket.textContent =
+      (currentTicket.ticketName || "Vé") +
+      " — Mã vé: " + currentTicket.id;
+
+    modalOrder.textContent =
+      "Đơn mua gốc: " + currentTicket.orderId;
+
+    ticketQR.replaceChildren();
+
+    const token = currentTicket.qrToken;
+
+    if (!token) {
+      ticketQR.textContent = "Không tìm thấy mã QR.";
+    } else if (typeof QRCode !== "undefined") {
+      // QR chứa mã token hiện hành của chiếc vé.
+      new QRCode(ticketQR, {
+        text: token,
+        width: 160,
+        height: 160,
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } else {
+      // Nếu thư viện QR chưa tải, vẫn hiện mã
+      // để có thể nhập thủ công ở trang check-in.
+      const code = createText("div", token);
+      code.style.fontSize = "11px";
+      code.style.padding = "10px";
+      code.style.overflowWrap = "anywhere";
+
+      ticketQR.appendChild(code);
+    }
+
+    modal?.classList.add("open");
+  }
+
+  function renderTickets() {
+    if (!ticketCore) {
+      showEmpty(
+        "Không tải được dữ liệu vé",
+        "Vui lòng kiểm tra file ticket-core.js."
+      );
+      return;
+    }
+
+    const user = getUser();
+
+    if (!user) {
+      showEmpty(
+        "Bạn chưa đăng nhập hoặc chưa xác minh eKYC",
+        "Đăng nhập và xác minh danh tính để xem vé.",
+        true
+      );
+      return;
+    }
+
+    syncOldOrders();
+
+    const tickets = getMyTickets().reverse();
+
+    if (!tickets.length) {
+      showEmpty(
+        "Bạn chưa có vé",
+        "Hãy mua vé hoặc mua lại vé trên sàn chính thức."
+      );
+      return;
+    }
+
+    list.replaceChildren();
+
+    tickets.forEach(ticket => {
+      const event = findEvent(ticket.eventId);
+
+      const card = document.createElement("article");
+      card.className = "ticket-card";
+
+      const top = document.createElement("div");
+      top.className = "ticket-top";
+
+      const image = document.createElement("img");
+      image.className = "ticket-image";
+      image.src = event?.image || "";
+      image.alt = event?.title || "Ảnh sự kiện";
+
+      const info = document.createElement("div");
+      info.className = "ticket-info";
+
+      const title = createText(
+        "h2",
+        event?.title ||
+          ticket.eventTitle ||
+          "Sự kiện"
+      );
+
+      const date = createText(
+        "p",
+        "📅 " +
+          (event?.date || "Đang cập nhật") +
+          " · " +
+          (event?.time || "")
+      );
+
+      const venue = createText(
+        "p",
+        "📍 " +
+          (event?.venue || "Đang cập nhật")
+      );
+
+      const type = createText(
+        "p",
+        "🎫 Loại vé: " +
+          (ticket.ticketName || "Vé")
+      );
+
+      const code = createText(
+        "p",
+        "Mã vé: " + ticket.id,
+        "muted"
+      );
+
+      const status = createText(
+        "span",
+        statusLabel(ticket),
+        "status"
+      );
+
+      if (ticket.status !== "valid") {
+        status.style.background = "#4a3030";
+        status.style.color = "#ffaaaa";
+      }
+
+      info.append(
+        title,
+        date,
+        venue,
+        type,
+        code,
+        status
+      );
+
+      top.append(image, info);
+
+      const bottom = document.createElement("div");
+      bottom.className = "ticket-bottom";
+
+      const price = createText(
+        "div",
+        money(ticket.originalPrice),
+        "price"
+      );
+
+      const actions = document.createElement("div");
+
+      const viewButton = document.createElement("button");
+      viewButton.type = "button";
+      viewButton.className = "button primary";
+      viewButton.textContent = "Xem vé / QR";
+      viewButton.disabled = ticket.status !== "valid";
+
+      viewButton.addEventListener("click", () => {
+        showTicketModal(ticket);
+      });
+
+      actions.appendChild(viewButton);
+
+      if (ticket.status === "valid") {
+        const resaleLink = document.createElement("a");
+
+        resaleLink.href = "resale.html";
+        resaleLink.className = "button";
+        resaleLink.textContent = "Bán lại vé";
+
+        actions.appendChild(resaleLink);
+      }
+
+      bottom.append(price, actions);
+
+      card.append(top, bottom);
+
+      list.appendChild(card);
+    });
+  }
+
+  closeModal?.addEventListener("click", () => {
+    modal?.classList.remove("open");
+  });
+
+  modal?.addEventListener("click", event => {
+    if (event.target === modal) {
       modal.classList.remove("open");
     }
   });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      modal?.classList.remove("open");
+    }
+  });
+
+  window.addEventListener("focus", renderTickets);
+
+  window.addEventListener("storage", renderTickets);
+
+  renderTickets();
 })();
