@@ -219,6 +219,7 @@
 
   form.addEventListener("submit", event => {
     event.preventDefault();
+    if (!validateResalePrice()) return;
 
     const available = getAvailableTickets();
     const ticket = available[Number(select.value)];
