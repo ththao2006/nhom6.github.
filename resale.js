@@ -165,10 +165,29 @@
       return;
     }
 
-    if (!Number.isFinite(price) || price < 1000) {
-      alert("Giá bán phải từ 1.000đ.");
+   
+    const originalPrice = Number(ticket.originalPrice);
+    const maxResalePrice = Math.floor(originalPrice * 110 / 100);
+
+    if (!Number.isFinite(originalPrice) || originalPrice <= 0) {
+      alert("Không xác định được giá gốc của vé.");
       return;
     }
+
+    if (!Number.isSafeInteger(price) || price < 1000) {
+      alert("Giá bán phải là số nguyên từ 1.000đ.");
+      return;
+    }
+
+    if (price > maxResalePrice) {
+      alert(
+        "Giá bán lại không được vượt quá 110% giá gốc!\n" +
+        "Giá gốc: " + money(originalPrice) + "\n" +
+        "Giá tối đa: " + money(maxResalePrice)
+      );
+      return;
+    }
+
 
     const listings = getListings();
 
