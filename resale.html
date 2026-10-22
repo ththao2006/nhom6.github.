@@ -395,6 +395,47 @@
         min-height: 230px;
       }
     }
+  
+/* CẢNH BÁO GIÁ BÁN LẠI */
+
+#resalePrice {
+  transition: border-color .2s, box-shadow .2s, background .2s;
+}
+
+#resalePrice.price-invalid {
+  border: 2px solid #ff4545;
+  background: #38191f;
+  box-shadow: 0 0 0 3px rgba(255, 69, 69, .18);
+  color: #fff;
+  outline: none;
+}
+
+#resalePrice.price-valid {
+  border-color: #2bd080;
+}
+
+.price-info {
+  margin-top: 9px;
+  font-size: 13px;
+  color: #b8ff35;
+}
+
+.price-error {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 9px;
+  background: #451d25;
+  border: 1px solid #ff4545;
+  color: #ff9393;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.price-error.show {
+  display: block;
+}
+
   </style>
 </head>
 
@@ -478,14 +519,24 @@
               Giá bán lại (VNĐ)
             </label>
 
-            <input
-              id="resalePrice"
-              type="number"
-              min="1000"
-              step="1000"
-              placeholder="Ví dụ: 1200000"
-              required
-            >
+            
+<input
+  id="resalePrice"
+  type="number"
+  min="1000"
+  step="1000"
+  placeholder="Nhập giá bán lại"
+  aria-describedby="priceInfo priceError"
+  required
+>
+
+<div id="priceInfo" class="price-info">
+  Chọn vé để xem giá bán lại tối đa.
+</div>
+
+<div id="priceError" class="price-error"
+     role="alert" aria-live="polite"></div>
+
 
             <div class="notice">
               Đây là hệ thống giao dịch mô phỏng
