@@ -61,9 +61,12 @@
     );
   }
 
-  function isOwnEvent(event) {
-    return event.organizerId === "organizer-demo";
-  }
+function isOwnEvent(event) {
+  return (
+    event.organizerId === "organizer-demo" ||
+    !event.organizerId
+  );
+}
 
   function getStatus(event) {
     if (event.status === "pending") {
