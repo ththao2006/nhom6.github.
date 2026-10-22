@@ -189,6 +189,42 @@
     renderListings();
   });
 
+  // Hiển thị poster sự kiện
+  function renderResaleEvents() {
+    const grid = document.getElementById("resaleEventGrid");
+    if (!grid) return;
+
+    const events = window.TT_SEED_EVENTS || [];
+    grid.replaceChildren();
+
+    events.forEach(event => {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "resale-event-card";
+
+      const image = document.createElement("img");
+      image.src = event.image || "";
+      image.alt = event.title || "Sự kiện";
+
+      const title = document.createElement("strong");
+      title.textContent = event.title || "Sự kiện";
+
+      const date = document.createElement("small");
+      date.textContent = event.date || "";
+
+      card.append(image, title, date);
+
+      card.addEventListener("click", () => {
+        document.getElementById("market")
+          .scrollIntoView({ behavior: "smooth" });
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  renderResaleEvents();
+
   renderOwnedTickets();
   renderListings();
 })();
