@@ -458,7 +458,8 @@ e.ticketTypes.some(t => t.quantity > 0)
 
     if (!card) return;
 
-    openEvent(card.dataset.featuredEvent);
+    window.location.href =
+  "event.html?id=" + encodeURIComponent(card.dataset.featuredEvent);
   });
 
   // Hỗ trợ mở sự kiện bằng bàn phím
@@ -468,7 +469,8 @@ e.ticketTypes.some(t => t.quantity > 0)
       ev.target.matches(".slider-card")
     ) {
       ev.preventDefault();
-      openEvent(ev.target.dataset.featuredEvent);
+      window.location.href =
+  "event.html?id=" + encodeURIComponent(ev.target.dataset.featuredEvent);
     }
   });
 
