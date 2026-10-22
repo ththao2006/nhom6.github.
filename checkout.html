@@ -123,6 +123,85 @@
       .box { padding: 19px; }
       .ticket-row { flex-wrap: wrap; }
     }
+    
+/* SƠ ĐỒ KHU VỰC VÉ */
+.seatmap {
+  background: #111729;
+  border: 1px solid #303c5c;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 18px 0;
+}
+
+.stage {
+  background: #696e7b;
+  color: white;
+  text-align: center;
+  padding: 17px;
+  border-radius: 7px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.zone {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 16px 7px;
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  min-height: 78px;
+  transition: .2s;
+}
+
+.zone strong,
+.zone small {
+  display: block;
+}
+
+.zone small {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.zone:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.15);
+}
+
+.zone.active {
+  border-color: #b8ff35;
+  box-shadow: 0 0 0 2px #b8ff3540;
+}
+
+.zone:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.zone:nth-child(4n+1) { background: #334c9e; }
+.zone:nth-child(4n+2) { background: #55b2df; }
+.zone:nth-child(4n+3) { background: #605cf0; }
+.zone:nth-child(4n+4) { background: #394b83; }
+
+.zone-hint {
+  margin-top: 12px;
+  color: #aeb7c9;
+  font-size: 13px;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .zone-grid { grid-template-columns: repeat(2, 1fr); }
+  .zone { padding: 12px 5px; }
+}
+
   </style>
 </head>
 <body>
