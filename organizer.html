@@ -316,15 +316,13 @@
         </a>
       </header>
 
-    <section class="stats">
+   <section class="stats">
 
-  <!-- 1. SỐ SỰ KIỆN - GIỮ NGUYÊN -->
   <div class="stat">
     <span class="muted">📅 Sự kiện</span>
     <strong id="statEvents">0</strong>
   </div>
 
-  <!-- 2. VÉ ĐÃ BÁN / TỔNG VÉ -->
   <div class="stat">
     <span class="muted">🎟️ Vé đã bán</span>
 
@@ -336,16 +334,41 @@
     </strong>
 
     <div class="progress">
-      <div
-        class="progress-fill"
-        id="ticketProgress"
-      ></div>
+      <div class="progress-fill" id="ticketProgress"></div>
     </div>
 
     <span class="stat-detail" id="ticketProgressText">
       Đã bán 0% tổng số vé
     </span>
   </div>
+
+  <div class="stat">
+    <span class="muted">🧾 Đơn hàng</span>
+    <strong id="statOrders">0</strong>
+  </div>
+
+  <div class="stat">
+    <span class="muted">💰 Doanh thu demo</span>
+
+    <strong id="statRevenue">0 đ</strong>
+
+    <span class="stat-detail">
+      / <span id="statRevenuePotential">0 đ</span>
+      tối đa dự kiến
+    </span>
+
+    <div class="progress">
+      <div class="progress-fill" id="revenueProgress"></div>
+    </div>
+
+    <span class="stat-detail" id="revenueProgressText">
+      Đạt 0% doanh thu tối đa dự kiến
+    </span>
+  </div>
+
+</section>
+
+<section class="panel" id="events">
 
   <!-- 3. SỐ ĐƠN HÀNG - GIỮ NGUYÊN -->
   <div class="stat">
