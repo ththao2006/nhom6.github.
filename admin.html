@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quản trị viên | Ticketbox Demo</title>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --side: #111a20;
+      --panel: #19222b;
+      --line: #2c3b46;
+      --green: #27c477;
+      --text: #f4f7f8;
+      --muted: #a4b2ba;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--side);
+      border-right: 1px solid var(--line);
+      padding: 28px 16px;
+    }
+
+    .brand {
+      display: block;
+      color: var(--green);
+      font-size: 27px;
+      font-weight: 900;
+      margin: 0 12px 35px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 13px 15px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      color: var(--muted);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: #203a30;
+      color: var(--green);
+    }
+
+    .main {
+      padding: 32px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 29px;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 21px;
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 22px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--green);
+      font-size: 27px;
+      margin-top: 12px;
+    }
+
+    .panel { margin-bottom: 25px; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+    }
+
+    th, td {
+      padding: 14px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: normal;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 30px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .pending {
+      background: #53421d;
+      color: #ffd777;
+    }
+
+    .approved {
+      background: #204632;
+      color: #70e7a6;
+    }
+
+    .rejected {
+      background: #503035;
+      color: #ff9999;
+    }
+
+    .btn {
+      background: var(--green);
+      border: 1px solid var(--green);
+      color: #07160f;
+      border-radius: 9px;
+      padding: 10px 14px;
+      font-weight: bold;
+    }
+
+    .btn.outline {
+      background: transparent;
+      color: var(--green);
+    }
+
+    .btn.danger {
+      background: transparent;
+      border-color: #f18b8b;
+      color: #f18b8b;
+    }
+
+    .btn.small {
+      font-size: 12px;
+      padding: 7px 10px;
+      margin: 3px;
+    }
+
+    .note {
+      border-left: 3px solid var(--green);
+      padding: 12px 15px;
+      background: #12251d;
+      border-radius: 6px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .role {
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .mini { font-size: 12px; }
+
+    @media (max-width: 1050px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 750px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+        padding: 15px;
+      }
+
+      .brand { margin: 0 0 12px; }
+
+      .nav-link {
+        display: inline-block;
+        margin: 3px;
+      }
+
+      .main { padding: 18px; }
+
+      .stats { gap: 10px; }
+
+      .stat { padding: 15px; }
+
+      .stat strong { font-size: 21px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <aside class="sidebar">
+      <a class="brand" href="admin.html">ticketbox</a>
+
+      <a class="nav-link active" href="#dashboard">
+        📊 Tổng quan
+      </a>
+
+      <a class="nav-link" href="#pending">
+        🕒 Chờ duyệt
+      </a>
+
+      <a class="nav-link" href="#all-events">
+        📅 Tất cả sự kiện
+      </a>
+
+      <a class="nav-link" href="#orders">
+        🎟️ Đơn hàng
+      </a>
+
+      <a class="nav-link" href="#resales">
+        🔄 Vé bán lại
+      </a>
+
+      <a class="nav-link" href="index.html">
+        ← Trang khách hàng
+      </a>
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar" id="dashboard">
+        <div>
+          <div class="eyebrow">
+            Administration · Demo
+          </div>
+
+          <h1>Trung tâm quản trị</h1>
+
+          <p class="muted">
+            Kiểm duyệt sự kiện và giám sát hoạt động Ticketbox
+          </p>
+        </div>
+
+        <div class="role">
+          🛡️ Quản trị viên
+        </div>
+      </header>
+
+      <div class="note">
+        Quy trình demo: Ban tổ chức gửi sự kiện →
+        Admin duyệt → khách hàng mới được xem và mua vé.
+        Các trang khách hàng và BTC sẽ được nối quy trình
+        này ở bước tiếp theo.
+      </div>
+
+      <section class="stats">
+        <div class="stat">
+          <span class="muted">Tổng sự kiện</span>
+          <strong id="statEvents">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Chờ duyệt</span>
+          <strong id="statPending">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Đơn đã thanh toán</span>
+          <strong id="statOrders">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Doanh thu demo</span>
+          <strong id="statRevenue">0 đ</strong>
+        </div>
+      </section>
+
+      <section class="panel" id="pending">
+        <h2>🕒 Sự kiện đang chờ duyệt</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tên sự kiện</th>
+                <th>Ngày</th>
+                <th>Địa điểm</th>
+                <th>BTC</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody id="pendingTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="all-events">
+        <h2>📅 Tất cả sự kiện</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sự kiện</th>
+                <th>Ngày</th>
+                <th>Giá từ</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody id="eventTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="orders">
+        <h2>🎟️ Đơn hàng đã thanh toán</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Sự kiện</th>
+                <th>Người mua</th>
+                <th>Số vé</th>
+                <th>Tổng tiền</th>
+              </tr>
+            </thead>
+
+            <tbody id="orderTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="resales">
+        <h2>🔄 Giám sát vé bán lại</h2>
+
+        <p class="muted">
+          Theo quy định demo, giá đăng bán không vượt quá
+          110% giá gốc.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Sự kiện</th>
+                <th>Giá gốc</th>
+                <th>Giá bán lại</th>
+                <th>Kiểm tra</th>
+                <th>Trạng thái</th>
+              </tr>
+            </thead>
+
+            <tbody id="resaleTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="muted mini">
+        Hệ thống mô phỏng — dữ liệu lưu trên trình duyệt
+        hiện tại, không phải phân quyền bảo mật thực tế.
+      </p>
+
+    </main>
+  </div>
+
+  <script src="data.js?v=4"></script>
+  <script src="admin.js?v=1"></script>
+</body>
+</html>
