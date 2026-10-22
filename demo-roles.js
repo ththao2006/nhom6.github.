@@ -1,18 +1,15 @@
 
 (() => {
+  "use strict";
+
   const USERS = {
-    customer: {
-      id: "customer-demo",
-      name: "Nguyễn Minh Anh",
-      email: "customer@ticketbox.demo",
-      role: "customer"
-    },
     organizer: {
       id: "organizer-demo",
       name: "Minh Anh — Organizer",
       email: "organizer@ticketbox.demo",
       role: "organizer"
     },
+
     admin: {
       id: "admin-demo",
       name: "Ticketbox Admin",
@@ -22,22 +19,26 @@
   };
 
   const labels = {
-    customer: "Khách hàng",
     organizer: "Ban tổ chức",
     admin: "Quản trị viên"
   };
 
-  function getUser() {
+  function getStaff() {
     try {
-      return JSON.parse(
+      const user = JSON.parse(
         localStorage.getItem("tt_user") || "null"
       );
+
+      return ["organizer", "admin"].includes(user?.role)
+        ? user
+        : null;
     } catch {
       return null;
     }
   }
 
   const header = document.querySelector(".header-actions");
+
   if (!header) return;
 
   const wrap = document.createElement("div");
@@ -53,40 +54,73 @@
   menu.hidden = true;
 
   function updateButton() {
-    const user = getUser();
+    const staff = getStaff();
 
     button.textContent =
       "🎭 " +
-      (labels[user?.role] || "Chọn vai trò") +
+      (labels[staff?.role] || "Vai trò demo") +
       " ▾";
 
     menu.querySelectorAll("[data-role]").forEach(item => {
       item.classList.toggle(
         "selected",
-        item.dataset.role === user?.role
+        item.dataset.role === staff?.role
       );
     });
   }
 
   Object.keys(USERS).forEach(role => {
     const item = document.createElement("button");
+
     item.type = "button";
     item.dataset.role = role;
     item.textContent = labels[role];
 
     item.addEventListener("click", () => {
+      // Vai trò quản lý dùng tài khoản demo riêng.
       localStorage.setItem(
         "tt_user",
         JSON.stringify(USERS[role])
       );
 
-      // app.js giữ user trong biến riêng.
-      // Tải lại trang để đồng bộ tài khoản mới.
+      // Không cho phiên khách hàng eKYC bị trộn với
+      // phiên quản lý khi đang trình diễn.
+      window.TT_AUTH?.logout();
+
       location.reload();
     });
 
     menu.appendChild(item);
   });
+
+  const customerItem = document.createElement("button");
+  customerItem.type = "button";
+  customerItem.textContent = "Khách hàng (eKYC) →";
+
+  customerItem.addEventListener("click", () => {
+    localStorage.removeItem("tt_user");
+
+    location.href =
+      "auth.html?return=" +
+      encodeURIComponent("index.html#home");
+  });
+
+  menu.appendChild(customerItem);
+
+  const staff = getStaff();
+
+  if (staff) {
+    const exitItem = document.createElement("button");
+    exitItem.type = "button";
+    exitItem.textContent = "Thoát vai trò demo";
+
+    exitItem.addEventListener("click", () => {
+      localStorage.removeItem("tt_user");
+      location.reload();
+    });
+
+    menu.appendChild(exitItem);
+  }
 
   wrap.append(button, menu);
 
@@ -136,7 +170,7 @@
       position: absolute;
       top: calc(100% + 8px);
       right: 0;
-      width: 190px;
+      width: 210px;
       background: #171e29;
       border: 1px solid #334638;
       border-radius: 12px;
@@ -177,19 +211,18 @@
   document.head.appendChild(style);
   updateButton();
 
-  // Liên kết nút "Bắt đầu tạo sự kiện"
-  // với dashboard riêng của Ban tổ chức.
+  // Liên kết dashboard riêng của Ban tổ chức.
   document.querySelectorAll(
     'a[href="#organizer-dashboard"]'
   ).forEach(link => {
     link.addEventListener("click", event => {
-      const role = getUser()?.role;
+      const role = getStaff()?.role;
 
       if (role === "organizer" || role === "admin") {
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        window.location.href = "organizer.html";
+        location.href = "organizer.html";
       }
     }, true);
   });
