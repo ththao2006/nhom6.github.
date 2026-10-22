@@ -238,11 +238,42 @@ $("#emptyEvents").addEventListener("click", ev => {
   }
 });
 
-  $("#eventGrid").addEventListener("click",ev=>{const fav=ev.target.closest("[data-fav]");if(fav){ev.stopPropagation();let f=read("favorites",[]);f=f.includes(fav.dataset.fav)?f.filter(x=>x!==fav.dataset.fav):[...f,fav.dataset.fav];write("favorites",f);fav.textContent=f.includes(fav.dataset.fav)?"♥":"♡";toast(f.includes(fav.dataset.fav)?"Đã lưu sự kiện":"Đã bỏ lưu sự kiện");return;}const card=ev.target.closest("[data-open-event]");if(card)openEvent(card.dataset.openEvent);});
+
+$("#eventGrid").addEventListener("click", ev => {
+  const fav = ev.target.closest("[data-fav]");
+
+  if (fav) {
+    ev.stopPropagation();
+    let f = read("favorites", []);
+    f = f.includes(fav.dataset.fav)
+      ? f.filter(x => x !== fav.dataset.fav)
+      : [...f, fav.dataset.fav];
+
+    write("favorites", f);
+    fav.textContent = f.includes(fav.dataset.fav) ? "♥" : "♡";
+    toast(f.includes(fav.dataset.fav) ? "Đã lưu sự kiện" : "Đã bỏ lưu sự kiện");
+    return;
+  }
+
+  const card = ev.target.closest("[data-open-event]");
+
+  if (card) {
+    window.location.href =
+      "event.html?id=" + encodeURIComponent(card.dataset.openEvent);
+  }
+});
   $("#artistGrid").addEventListener("click",ev=>{const a=ev.target.closest("[data-artist]");if(a)openArtist(a.dataset.artist);});
   $("#modalContent").addEventListener("click",handleModalClick);
   $("#modalClose").onclick=closeModal;$("#modalBackdrop").addEventListener("click",ev=>{if(ev.target===$("#modalBackdrop"))closeModal();});
-  document.addEventListener("keydown",ev=>{if(ev.key==="Escape")closeModal();if(ev.key==="Enter"&&ev.target.matches("[data-open-event]"))openEvent(ev.target.dataset.openEvent);});
+
+document.addEventListener("keydown", ev => {
+  if (ev.key === "Escape") closeModal();
+
+  if (ev.key === "Enter" && ev.target.matches("[data-open-event]")) {
+    window.location.href =
+      "event.html?id=" + encodeURIComponent(ev.target.dataset.openEvent);
+  }
+});
   $("#accountButton").onclick=()=>{if(user){modal(`<span class="eyebrow">YOUR ACCOUNT</span><h2>${user.name}</h2><p>${user.email}</p><span class="pill">Vai trò: ${user.role}</span><button class="button button-primary full" id="accountTickets">Vé của tôi</button>${user.role==="organizer"?'<button class="button button-secondary full" id="accountOrganizer">Quản lý sự kiện</button>':""}${user.role==="admin"?'<button class="button button-secondary full" id="accountAdmin">Quản trị</button>':""}<button class="button button-secondary full" id="logoutButton">Đăng xuất</button>`);$("#accountTickets").onclick=openTickets;if($("#accountOrganizer"))$("#accountOrganizer").onclick=openOrganizer;if($("#accountAdmin"))$("#accountAdmin").onclick=openAdmin;$("#logoutButton").onclick=()=>{user=null;save();closeModal();$("#accountButton").textContent="Đăng nhập";toast("Đã đăng xuất.");};}else openLogin();};
   $("#menuToggle").onclick=()=>$(".main-nav").classList.toggle("open");
   $$(".main-nav a").forEach(a=>a.addEventListener("click",()=>$(".main-nav").classList.remove("open")));
