@@ -155,18 +155,18 @@
     <!-- BỘ LỌC SỰ KIỆN -->
     
 <!-- Bộ lọc ẩn: giữ lại để tương thích với app.js -->
+
 <section id="searchPanel" class="hidden" aria-hidden="true">
   <form id="filterForm">
-    <input id="searchInput" type="search">
+    <input
+      id="searchInput"
+      type="search"
+      placeholder="Tìm kiếm sự kiện"
+      tabindex="-1"
+    >
+  </form>
+</section>
 
-    <select id="genreFilter">
-      <option value="">Tất cả thể loại</option>
-      <option>Âm nhạc</option>
-      <option>Festival</option>
-      <option>Workshop</option>
-      <option>Nghệ thuật</option>
-      <option>Thể thao</option>
-    </select>
 
     <select id="locationFilter">
       <option value="">Mọi địa điểm</option>
@@ -203,7 +203,63 @@
         </a>
       </div>
 
-      <div class="category-row" id="categoryRow">
+      
+<!-- Bộ lọc sự kiện dạng dropdown -->
+<div class="event-filter-bar" id="categoryRow">
+
+  <label class="event-filter-item">
+    <span>Thể loại</span>
+    <select id="genreFilter">
+      <option value="">Tất cả thể loại</option>
+      <option value="Âm nhạc">Âm nhạc</option>
+      <option value="Festival">Festival</option>
+      <option value="Workshop">Workshop</option>
+      <option value="Nghệ thuật">Nghệ thuật</option>
+      <option value="Thể thao">Thể thao</option>
+    </select>
+  </label>
+
+  <label class="event-filter-item">
+    <span>Thời gian</span>
+    <select id="timeFilter">
+      <option value="">Tất cả thời gian</option>
+      <option value="today">Hôm nay</option>
+      <option value="tomorrow">Ngày mai</option>
+      <option value="weekend">Cuối tuần này</option>
+      <option value="7days">7 ngày tới</option>
+      <option value="30days">30 ngày tới</option>
+    </select>
+  </label>
+
+  <label class="event-filter-item">
+    <span>Vị trí</span>
+    <select id="locationFilter">
+      <option value="">Mọi địa điểm</option>
+      <option value="Hà Nội">Hà Nội</option>
+      <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+      <option value="Đà Nẵng">Đà Nẵng</option>
+    </select>
+  </label>
+
+  <label class="event-filter-item">
+    <span>Giá tiền</span>
+    <select id="priceFilter">
+      <option value="">Tất cả mức giá</option>
+      <option value="free">Miễn phí</option>
+      <option value="paid">Có phí</option>
+    </select>
+  </label>
+
+  <button
+    class="event-filter-reset"
+    id="resetFilters"
+    type="button"
+  >
+    <span>↻</span> Đặt lại
+  </button>
+
+</div>
+
 
         <button class="category-chip active" data-category="">
           Tất cả
