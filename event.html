@@ -1,17 +1,59 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chi tiết sự kiện</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Chi tiết sự kiện | TrueTicket</title>
+  <link rel="icon" href="data:,">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0c0e13; color: #f5f5f5; font-family: Arial, sans-serif; line-height: 1.6; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1120px, 92%); margin: auto; }
+    .header { background: #141820; border-bottom: 1px solid #292e38; padding: 18px 0; }
+    .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .logo { font-size: 24px; font-weight: 800; color: #b8ff35; }
+    .back { color: #b8ff35; font-weight: bold; }
+    .hero { padding: 34px 0; }
+    .hero img { display: block; width: 100%; height: 390px; object-fit: cover; border-radius: 18px; }
+    .content { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, 1fr); gap: 28px; padding-bottom: 60px; }
+    .panel { background: #181c25; border: 1px solid #303540; border-radius: 18px; padding: 26px; margin-bottom: 22px; }
+    .tag { display: inline-block; background: #b8ff35; color: #10140a; border-radius: 30px; padding: 5px 13px; font-size: 13px; font-weight: bold; }
+    h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.2; margin: 18px 0; }
+    h2 { font-size: 22px; margin: 0 0 16px; }
+    .muted { color: #aab0bc; }
+    .info { margin: 12px 0; }
+    .price { color: #b8ff35; font-size: 27px; font-weight: bold; }
+    .ticket { padding: 15px 0; border-bottom: 1px solid #343944; }
+    .ticket:last-child { border-bottom: none; }
+    .ticket strong { display: block; }
+    .ticket-price { color: #b8ff35; font-weight: bold; }
+    .button { display: block; width: 100%; border: none; background: #b8ff35; color: #10140a; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; text-align: center; cursor: pointer; margin-top: 20px; }
+    .button:disabled { background: #555; color: #ddd; cursor: not-allowed; }
+    .artist-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 18px; }
+    .artist { text-align: center; }
+    .artist img { width: 105px; height: 105px; border-radius: 50%; object-fit: cover; }
+    .artist strong { display: block; margin-top: 8px; }
+    .error { text-align: center; padding: 80px 20px; }
+    @media (max-width: 760px) {
+      .content { grid-template-columns: 1fr; }
+      .hero img { height: 230px; }
+      .panel { padding: 20px; }
+    }
+  </style>
 </head>
 <body>
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">TrueTicket</a>
+      <a href="index.html" class="back">← Trang chủ</a>
+    </div>
+  </header>
 
-  <h1>Trang chi tiết sự kiện</h1>
-  <p>Trang này đang được xây dựng.</p>
-
-  <a href="index.html">← Quay về trang chủ</a>
+  <main id="eventPage" class="container">
+    <p class="muted">Đang tải thông tin sự kiện...</p>
+  </main>
 
   <script src="data.js"></script>
   <script src="event.js"></script>
