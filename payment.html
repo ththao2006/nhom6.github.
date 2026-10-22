@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thanh toán | Ticketbox</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --green: #27c477;
+      --dark: #080a0d;
+      --panel: #34353b;
+      --muted: #b8bbc4;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--dark);
+      color: white;
+      font: 15px/1.6 Arial, sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .container {
+      width: min(1200px, 92%);
+      margin: auto;
+    }
+
+    .topbar {
+      background: var(--green);
+      padding: 18px 0;
+    }
+
+    .topbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .back {
+      color: white;
+      text-decoration: none;
+    }
+
+    .hero {
+      background: linear-gradient(
+        90deg,
+        #151b25,
+        #33353e
+      );
+      padding: 32px 0;
+    }
+
+    .hero-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .hero h1 { margin: 0 0 12px; }
+
+    .hero p { margin: 5px 0; }
+
+    .timer-box {
+      background: #ffffff20;
+      border: 1px solid #ffffff40;
+      padding: 16px 24px;
+      border-radius: 14px;
+      text-align: center;
+      min-width: 190px;
+    }
+
+    .timer {
+      font-size: 32px;
+      font-weight: bold;
+      color: #ff5365;
+    }
+
+    .page-title {
+      color: var(--green);
+      margin: 30px 0 22px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+      gap: 20px;
+      padding-bottom: 60px;
+    }
+
+    .panel {
+      background: var(--panel);
+      padding: 22px;
+      border-radius: 13px;
+      margin-bottom: 14px;
+    }
+
+    .panel h3 {
+      margin: 0 0 12px;
+      color: var(--green);
+      font-size: 17px;
+    }
+
+    .panel p { margin: 7px 0; }
+
+    .muted { color: var(--muted); }
+
+    .field {
+      width: 100%;
+      background: #23252b;
+      border: 1px solid #737780;
+      border-radius: 8px;
+      padding: 12px;
+      color: white;
+      margin-top: 7px;
+    }
+
+    .voucher-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .voucher-row input { flex: 1; min-width: 0; }
+
+    .small-button {
+      background: #20252a;
+      border: 1px solid var(--green);
+      color: var(--green);
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+
+    .payment-option input {
+      accent-color: var(--green);
+      width: 19px;
+      height: 19px;
+    }
+
+    .white-panel {
+      background: white;
+      color: #252525;
+      padding: 20px;
+      border-radius: 13px;
+      margin-bottom: 14px;
+    }
+
+    .white-panel h3 { margin: 0 0 14px; }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .total {
+      color: var(--green);
+      font-size: 23px;
+      font-weight: bold;
+    }
+
+    .terms {
+      display: flex;
+      gap: 9px;
+      font-size: 13px;
+      margin: 18px 0;
+    }
+
+    .pay-button {
+      width: 100%;
+      background: var(--green);
+      color: white;
+      border: 0;
+      padding: 14px;
+      border-radius: 7px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .pay-button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 12px;
+      font-size: 13px;
+    }
+
+    .error { color: #ff9191; }
+    .success { color: #39e7a1; }
+
+    .qr-screen {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .qr-visual {
+      width: 180px;
+      height: 180px;
+      margin: 18px auto;
+      background: white;
+      border: 12px solid white;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #111;
+    }
+
+    .qr-visual svg {
+      width: 140px;
+      height: 140px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      .hero-inner { flex-direction: column; align-items: stretch; }
+      .timer-box { width: 100%; }
+      .logo { font-size: 24px; }
+      .voucher-row { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <a href="index.html" class="logo">ticketbox</a>
+      <a href="checkout.html" id="backLink" class="back">
+        ← Chọn lại vé
+      </a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <h1 id="eventTitle">Đang tải sự kiện...</h1>
+        <p id="eventDate"></p>
+        <p id="eventVenue"></p>
+      </div>
+
+      <div class="timer-box">
+        <div>Hoàn tất đặt vé trong</div>
+        <div class="timer" id="timer">15:00</div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container">
+    <h2 class="page-title">THANH TOÁN</h2>
+
+    <div id="paymentApp" class="layout">
+      <div>
+        <section class="panel">
+          <h3>Thông tin nhận vé</h3>
+          <label for="receiverEmail">Email nhận vé</label>
+          <input
+            id="receiverEmail"
+            type="email"
+            class="field"
+            placeholder="example@gmail.com"
+            required
+          >
+          <p class="muted">
+            Vé điện tử demo sẽ được lưu trong trình duyệt.
+          </p>
+        </section>
+
+        <section class="panel">
+          <h3>Mã khuyến mãi</h3>
+          <p class="muted">Thử mã: DEMO10</p>
+          <div class="voucher-row">
+            <input
+              id="voucherInput"
+              class="field"
+              placeholder="Nhập mã khuyến mãi"
+            >
+            <button id="applyVoucher" class="small-button">
+              Áp dụng
+            </button>
+          </div>
+          <p id="voucherMessage" class="message"></p>
+        </section>
+
+        <section class="panel">
+          <h3>Phương thức thanh toán</h3>
+
+          <label class="payment-option">
+            <input type="radio" name="method" value="vnpay">
+            <span>VNPAY / Ứng dụng ngân hàng</span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="method" value="vietqr" checked>
+            <span>VietQR</span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="method" value="shopeepay">
+            <span>ShopeePay</span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="method" value="zalopay">
+            <span>ZaloPay</span>
+          </label>
+
+          <label class="payment-option">
+            <input type="radio" name="method" value="card">
+            <span>Thẻ ghi nợ / Thẻ tín dụng</span>
+          </label>
+
+          <p class="muted">
+            Tất cả phương thức đều là mô phỏng,
+            không kết nối cổng thanh toán thật.
+          </p>
+        </section>
+      </div>
+
+      <aside>
+        <section class="white-panel">
+          <h3>Thông tin đặt vé</h3>
+          <div id="ticketSummary"></div>
+        </section>
+
+        <section class="white-panel">
+          <h3>Thông tin đơn hàng</h3>
+
+          <div class="summary-row">
+            <span>Tạm tính</span>
+            <span id="subtotal">0 đ</span>
+          </div>
+
+          <div class="summary-row">
+            <span>Giảm giá</span>
+            <span id="discount">0 đ</span>
+          </div>
+
+          <hr>
+
+          <div class="summary-row">
+            <strong>Tổng tiền</strong>
+            <strong class="total" id="grandTotal">0 đ</strong>
+          </div>
+
+          <label class="terms">
+            <input type="checkbox" id="agreeTerms">
+            <span>
+              Tôi đồng ý với điều khoản đặt vé demo.
+            </span>
+          </label>
+
+          <button id="payButton" class="pay-button" disabled>
+            Thanh toán
+          </button>
+
+          <p id="paymentMessage" class="message"></p>
+        </section>
+      </aside>
+    </div>
+
+    <section id="resultScreen" class="panel hidden"></section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="payment.js"></script>
+</body>
+</html>
