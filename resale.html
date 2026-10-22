@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bán lại vé | Ticketbox</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0c0e13;
+      color: white;
+      font: 15px/1.6 Arial, sans-serif;
+    }
+
+    header {
+      background: #171b24;
+      border-bottom: 1px solid #303540;
+      padding: 17px 0;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: auto;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    a { color: #b8ff35; text-decoration: none; }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    h1 { margin: 32px 0 5px; }
+
+    .muted { color: #aeb7c9; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 25px;
+      margin: 30px 0 60px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #191e28;
+      border: 1px solid #333c4b;
+      border-radius: 16px;
+      padding: 22px;
+    }
+
+    h2 { margin: 0 0 18px; }
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: #10151e;
+      border: 1px solid #485163;
+      border-radius: 8px;
+      color: white;
+      font: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: 1px solid #b8ff35;
+    }
+
+    button {
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 11px 17px;
+      border-radius: 8px;
+      border: 1px solid #b8ff35;
+      background: transparent;
+      color: #b8ff35;
+      font-weight: bold;
+    }
+
+    .btn.primary {
+      background: #b8ff35;
+      color: #111;
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+
+    .full { width: 100%; margin-top: 20px; }
+
+    .listing {
+      padding: 17px 0;
+      border-bottom: 1px solid #333c4b;
+    }
+
+    .listing:last-child { border-bottom: 0; }
+
+    .listing h3 { margin: 0 0 6px; }
+
+    .price {
+      font-size: 21px;
+      color: #b8ff35;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 20px;
+      background: #28422b;
+      color: #b8ff35;
+      padding: 3px 10px;
+      font-size: 12px;
+    }
+
+    .notice {
+      padding: 12px;
+      border-radius: 9px;
+      background: #263043;
+      color: #cbd5e1;
+      font-size: 13px;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 800px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a href="index.html" class="logo">Ticketbox</a>
+      <a href="my-tickets.html">🎟️ Vé của tôi</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>🔄 Sàn bán lại vé</h1>
+    <p class="muted">
+      Đăng bán vé đã mua hoặc tìm vé từ người khác.
+    </p>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>Đăng bán vé</h2>
+
+        <form id="resaleForm">
+          <label for="ownedTicket">Chọn vé đã mua</label>
+          <select id="ownedTicket" required>
+            <option value="">-- Chọn vé --</option>
+          </select>
+
+          <label for="resalePrice">Giá bán lại (VNĐ)</label>
+          <input
+            id="resalePrice"
+            type="number"
+            min="1000"
+            step="1000"
+            placeholder="Ví dụ: 1200000"
+            required
+          >
+
+          <div class="notice">
+            Đây là chức năng mô phỏng phục vụ bài tập.
+            Không thực hiện giao dịch tiền thật.
+          </div>
+
+          <button class="btn primary full" type="submit">
+            Đăng bán vé
+          </button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Vé đang được bán lại</h2>
+        <div id="resaleList">
+          <p class="muted">Đang tải...</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="resale.js"></script>
+</body>
+</html>
