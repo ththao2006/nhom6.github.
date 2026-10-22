@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đặt vé | Ticketbox</title>
+  <link rel="icon" href="data:,">
+  <style>
+    body {
+      margin: 0;
+      background: #0c0e13;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      background: #141820;
+      padding: 18px 0;
+      border-bottom: 1px solid #303540;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    a {
+      color: #b8ff35;
+      text-decoration: none;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .box {
+      background: #181c25;
+      border: 1px solid #303540;
+      border-radius: 16px;
+      padding: 28px;
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Ticketbox</a>
+      <a href="index.html">← Trang chủ</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>Đặt vé sự kiện</h1>
+
+    <div class="box">
+      <p id="checkoutStatus">Đang tải thông tin đặt vé...</p>
+    </div>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="checkout.js"></script>
+</body>
+</html>
