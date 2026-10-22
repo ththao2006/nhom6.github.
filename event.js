@@ -157,7 +157,8 @@
   } else {
     buyButton.textContent = event.free ? "Đăng ký tham gia" : "Mua vé ngay";
     buyButton.addEventListener("click", () => {
-      alert("Trang đặt vé sẽ được xây dựng ở bước tiếp theo!");
+      
+window.location.href = "checkout.html?id=" + encodeURIComponent(event.id);
     });
   }
 })();
