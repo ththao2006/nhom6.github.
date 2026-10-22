@@ -103,31 +103,88 @@ function isOwnEvent(event) {
     };
   }
 
-  function renderStats() {
-    const events = getEvents();
-    const orders = getOriginalOrders();
+function renderStats() {
+  const events = getEvents();
+  const orders = getOriginalOrders();
 
-    const ticketCount = orders.reduce((sum, order) => {
-      const quantity = (order.items || []).reduce(
-        (count, item) =>
-          count + Number(item.quantity || 0),
-        0
-      );
-
-      return sum + quantity;
-    }, 0);
-
-    const revenue = orders.reduce(
-      (sum, order) =>
-        sum + Number(order.total || 0),
+  const ticketCount = orders.reduce((sum, order) => {
+    const quantity = (order.items || []).reduce(
+      (count, item) =>
+        count + Number(item.quantity || 0),
       0
     );
 
-    $("statEvents").textContent = events.length;
-    $("statTickets").textContent = ticketCount;
-    $("statOrders").textContent = orders.length;
-    $("statRevenue").textContent = money(revenue);
-  }
+    return sum + quantity;
+  }, 0);
+
+  const revenue = orders.reduce(
+    (sum, order) =>
+      sum + Number(order.total || 0),
+    0
+  );
+
+  // Tổng số vé được phát hành của các sự kiện.
+  const totalCapacity = events.reduce((sum, event) => {
+    const capacity = (event.ticketTypes || []).reduce(
+      (count, ticket) =>
+        count + Number(ticket.quantity || 0),
+      0
+    );
+
+    return sum + capacity;
+  }, 0);
+
+  // Doanh thu tối đa nếu bán hết vé theo giá gốc.
+  const potentialRevenue = events.reduce((sum, event) => {
+    const potential = (event.ticketTypes || []).reduce(
+      (total, ticket) =>
+        total +
+        Number(ticket.price || 0) *
+        Number(ticket.quantity || 0),
+      0
+    );
+
+    return sum + potential;
+  }, 0);
+
+  const ticketPercent = totalCapacity > 0
+    ? (ticketCount / totalCapacity) * 100
+    : 0;
+
+  const revenuePercent = potentialRevenue > 0
+    ? (revenue / potentialRevenue) * 100
+    : 0;
+
+  const formatPercent = value =>
+    new Intl.NumberFormat("vi-VN", {
+      maximumFractionDigits: 1
+    }).format(value);
+
+  $("statEvents").textContent = events.length;
+  $("statTickets").textContent = ticketCount;
+  $("statOrders").textContent = orders.length;
+  $("statRevenue").textContent = money(revenue);
+
+  $("statTicketCapacity").textContent =
+    totalCapacity;
+
+  $("statRevenuePotential").textContent =
+    money(potentialRevenue);
+
+  $("ticketProgress").style.width =
+    Math.min(100, Math.max(0, ticketPercent)) + "%";
+
+  $("revenueProgress").style.width =
+    Math.min(100, Math.max(0, revenuePercent)) + "%";
+
+  $("ticketProgressText").textContent =
+    "Đã bán " + formatPercent(ticketPercent) +
+    "% tổng số vé";
+
+  $("revenueProgressText").textContent =
+    "Đạt " + formatPercent(revenuePercent) +
+    "% doanh thu tối đa dự kiến";
+}
 
   function createButton(text, className, onClick) {
     const button = document.createElement("button");
