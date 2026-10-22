@@ -1,20 +1,32 @@
 
 (() => {
-  const form = document.getElementById("resaleForm");
-  const select = document.getElementById("ownedTicket");
-  const priceInput = document.getElementById("resalePrice");
-  const priceInfo = document.getElementById("priceInfo");
-  const priceError = document.getElementById("priceError");
-  const submitBtn = form.querySelector('button[type="submit"]');
-  const list = document.getElementById("resaleList");
+  "use strict";
 
+  const $ = id => document.getElementById(id);
+  const form = $("resaleForm");
+  const select = $("ownedTicket");
+  const priceInput = $("resalePrice");
+  const priceInfo = $("priceInfo");
+  const priceError = $("priceError");
+  const submitBtn = form?.querySelector('button[type="submit"]');
+  const list = $("resaleList");
+  const grid = $("resaleEventGrid");
+
+  if (!form || !select || !priceInput || !list) return;
+
+  const auth = window.TT_AUTH;
   const money = n =>
-    new Intl.NumberFormat("vi-VN").format(n) + " đ";
+    new Intl.NumberFormat("vi-VN").format(Number(n) || 0) + " đ";
+
+  const normalize = value => String(value ?? "");
+
+  let selectedEventId = "";
+  let availableTickets = [];
 
   function readArray(key) {
     try {
-      const data = JSON.parse(localStorage.getItem(key) || "[]");
-      return Array.isArray(data) ? data : [];
+      const value = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(value) ? value : [];
     } catch {
       return [];
     }
@@ -23,96 +35,253 @@
   const getOrders = () => readArray("tt_orders");
   const getListings = () => readArray("tt_resales");
 
-  function saveListings(items) {
-    localStorage.setItem("tt_resales", JSON.stringify(items));
+  function currentUser() {
+    return auth?.getCurrentUser?.() || null;
   }
 
-  // Lấy giá gốc từ dữ liệu BTC.
-  // Không lấy giá mua lại làm giá gốc.
+  function verifiedUser() {
+    const user = currentUser();
+    return user?.verified && user?.verifiedIdentityId
+      ? user
+      : null;
+  }
+
+  function ownerOf(order) {
+    return order.buyer?.userId || null;
+  }
+
+  function getEvents() {
+    const map = new Map();
+
+    (window.TT_SEED_EVENTS || []).forEach(event => {
+      map.set(normalize(event.id), event);
+    });
+
+    readArray("tt_events").forEach(event => {
+      map.set(normalize(event.id), event);
+    });
+
+    return [...map.values()];
+  }
+
   function getOriginalPrice(eventId, ticketId, fallback) {
-    const seed = window.TT_SEED_EVENTS || [];
-    const saved = readArray("tt_events");
+    const event = getEvents().find(
+      item => normalize(item.id) === normalize(eventId)
+    );
 
-    const events = [...seed, ...saved];
-    const event = events.find(e => e.id === eventId);
-    const ticket = (event?.ticketTypes || [])
-      .find(t => t.id === ticketId);
+    const type = (event?.ticketTypes || []).find(
+      item => normalize(item.id) === normalize(ticketId)
+    );
 
-    const price = Number(ticket?.price);
+    const officialPrice = Number(type?.price);
 
-    if (Number.isFinite(price) && price > 0) {
-      return price;
+    if (Number.isFinite(officialPrice) && officialPrice > 0) {
+      return officialPrice;
     }
 
     const backup = Number(fallback);
+
     return Number.isFinite(backup) && backup > 0
       ? backup
       : 0;
   }
 
-  // Vé còn thuộc quyền sở hữu và chưa đăng bán.
-  function getAvailableTickets() {
-    const orders = getOrders();
-    const listings = getListings();
-    const available = [];
+  // Mỗi vé được nhận diện bằng:
+  // mã đơn + vị trí loại vé + vị trí vé trong loại đó.
+  function unitKey(orderId, itemIndex, unitIndex) {
+    return [
+      normalize(orderId),
+      itemIndex,
+      unitIndex
+    ].join("::");
+  }
 
-    orders.forEach(order => {
+  function makeUnits(order) {
+    const result = [];
+
+    (order.items || []).forEach((item, itemIndex) => {
+      const quantity = Number(item.quantity) || 0;
+      const ticketId = item.ticketTypeId || item.id;
+
+      if (!ticketId) return;
+
+      for (let unitIndex = 0; unitIndex < quantity; unitIndex++) {
+        result.push({
+          unitKey: unitKey(order.id, itemIndex, unitIndex),
+          orderId: order.id,
+          eventId: order.eventId,
+          eventTitle: order.eventTitle,
+          ticketId,
+          ticketName: item.name,
+          originalPrice: getOriginalPrice(
+            order.eventId,
+            ticketId,
+            item.originalPrice || item.price
+          ),
+          ownerUserId: ownerOf(order),
+          ownerIdentityId:
+            order.buyer?.verifiedIdentityId || null
+        });
+      }
+    });
+
+    return result;
+  }
+
+  function getAvailableTickets() {
+    const user = verifiedUser();
+    if (!user) return [];
+
+    const listings = getListings();
+    const result = [];
+
+    getOrders().forEach(order => {
       if (order.status !== "paid") return;
 
-      (order.items || []).forEach(item => {
-        const ticketId = item.ticketTypeId || item.id;
-        if (!ticketId) return;
+      // Không được lấy vé của người khác.
+      if (ownerOf(order) !== user.id) return;
 
-        const quantity = Number(item.quantity) || 0;
+      // Kiểm tra danh tính gắn với đơn hàng.
+      if (
+        order.buyer?.verifiedIdentityId !==
+        user.verifiedIdentityId
+      ) return;
 
-        // Vé đã bán đi không còn thuộc người bán.
-        const soldCount = listings.filter(x =>
-          x.orderId === order.id &&
-          x.ticketId === ticketId &&
-          x.status === "sold"
-        ).length;
+      const units = makeUnits(order);
 
-        // Vé đang đăng bán cũng không được đăng trùng.
-        const activeCount = listings.filter(x =>
-          x.orderId === order.id &&
-          x.ticketId === ticketId &&
-          x.status === "active"
-        ).length;
-
-        const remaining = Math.max(
-          0,
-          quantity - soldCount - activeCount
+      units.forEach(unit => {
+        // Tin đăng mới sử dụng unitKey.
+        const alreadyListed = listings.some(item =>
+          item.unitKey === unit.unitKey &&
+          ["active", "sold"].includes(item.status)
         );
 
-        const originalPrice = getOriginalPrice(
-          order.eventId,
-          ticketId,
-          item.originalPrice || item.price
+        if (alreadyListed) return;
+
+        // Tương thích với tin đăng cũ chưa có unitKey:
+        // dành trước số vé tương ứng để tránh đăng trùng.
+        const sameTypeUnits = units.filter(item =>
+          normalize(item.ticketId) ===
+          normalize(unit.ticketId)
         );
 
-        for (let i = 0; i < remaining; i++) {
-          available.push({
-            orderId: order.id,
-            eventId: order.eventId,
-            eventTitle: order.eventTitle,
-            ticketId,
-            ticketName: item.name,
-            originalPrice
-          });
+        const position = sameTypeUnits.findIndex(
+          item => item.unitKey === unit.unitKey
+        );
+
+        const legacyCount = listings.filter(item =>
+          !item.unitKey &&
+          normalize(item.orderId) === normalize(order.id) &&
+          normalize(item.ticketId) ===
+            normalize(unit.ticketId) &&
+          ["active", "sold"].includes(item.status)
+        ).length;
+
+        if (position < legacyCount) return;
+
+        // Không bán lại vé của sự kiện đã kết thúc.
+        const event = getEvents().find(
+          item =>
+            normalize(item.id) === normalize(unit.eventId)
+        );
+
+        if (!event) return;
+
+        const eventDate = String(event.date || "");
+
+        if (/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) {
+          if (new Date(eventDate + "T23:59:59") < new Date()) {
+            return;
+          }
         }
+
+        if (unit.originalPrice <= 0) return;
+
+        result.push(unit);
       });
     });
 
-    return available;
+    return result;
+  }
+
+  function showFormNotice(message, isError = false) {
+    let notice = form.querySelector(".resale-success");
+
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.className = "notice resale-success";
+      form.appendChild(notice);
+    }
+
+    notice.style.background = isError
+      ? "#451d25"
+      : "#164b31";
+
+    notice.style.color = isError
+      ? "#ff9393"
+      : "#b8ff35";
+
+    notice.textContent = message;
+  }
+
+  function renderOwnedTickets() {
+    availableTickets = getAvailableTickets();
+
+    select.replaceChildren();
+
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "-- Chọn vé --";
+    select.appendChild(placeholder);
+
+    availableTickets.forEach(ticket => {
+      const option = document.createElement("option");
+
+      option.value = ticket.unitKey;
+      option.textContent =
+        ticket.eventTitle + " — " +
+        ticket.ticketName + " — " +
+        money(ticket.originalPrice) +
+        " — #" + ticket.unitKey.split("::").slice(-2).join("-");
+
+      select.appendChild(option);
+    });
+
+    select.disabled = availableTickets.length === 0;
+
+    const user = verifiedUser();
+
+    if (!user) {
+      showFormNotice(
+        "🔒 Đăng nhập và hoàn thành eKYC để đăng bán vé. " +
+        "Truy cập trang Đăng nhập / Đăng ký.",
+        true
+      );
+
+      const link = document.createElement("a");
+      link.href =
+        "auth.html?return=" +
+        encodeURIComponent("resale.html");
+      link.textContent = " → Đi đến eKYC";
+      link.style.color = "#b8ff35";
+
+      form.querySelector(".resale-success")?.appendChild(link);
+    } else if (!availableTickets.length) {
+      showFormNotice(
+        "Bạn chưa có vé hợp lệ để đăng bán. " +
+        "Hãy mua vé bằng tài khoản eKYC này trước."
+      );
+    } else {
+      form.querySelector(".resale-success")?.remove();
+    }
+
+    validateResalePrice();
   }
 
   function getSelectedTicket() {
-    if (select.value === "") return null;
-
-    const index = Number(select.value);
-    if (!Number.isInteger(index)) return null;
-
-    return getAvailableTickets()[index] || null;
+    return availableTickets.find(
+      item => item.unitKey === select.value
+    ) || null;
   }
 
   function validateResalePrice() {
@@ -125,109 +294,72 @@
     );
 
     if (priceError) {
-      priceError.classList.remove("show");
       priceError.textContent = "";
+      priceError.classList.remove("show");
     }
 
-    if (!ticket) {
-      if (priceInfo) {
-        priceInfo.textContent =
-          "Chọn vé để xem giá bán lại tối đa.";
-      }
+    if (!verifiedUser() || !ticket) {
+      priceInfo.textContent =
+        "Chọn vé để xem giá bán lại tối đa.";
       submitBtn.disabled = true;
       return false;
     }
 
     const original = Number(ticket.originalPrice);
-    const maxPrice = Math.floor(original * 110 / 100);
+    const maximum = Math.floor(original * 1.1);
 
-    if (!Number.isFinite(original) || original <= 0) {
-      if (priceInfo) {
-        priceInfo.textContent =
-          "Không xác định được giá gốc của vé.";
-      }
-      submitBtn.disabled = true;
-      return false;
-    }
+    priceInfo.textContent =
+      "Giá gốc: " + money(original) +
+      " · Tối đa 110%: " + money(maximum);
 
-    if (priceInfo) {
-      priceInfo.textContent =
-        "Giá gốc: " + money(original) +
-        " · Giá tối đa (110%): " + money(maxPrice);
-    }
+    const valid =
+      priceInput.value.trim() !== "" &&
+      Number.isSafeInteger(price) &&
+      price >= 1000 &&
+      price <= maximum;
 
-    if (priceInput.value.trim() === "") {
-      submitBtn.disabled = true;
-      return false;
-    }
-
-    const invalid =
-      !Number.isSafeInteger(price) ||
-      price < 1000 ||
-      price > maxPrice;
-
-    if (invalid) {
+    if (!valid && priceInput.value.trim()) {
       priceInput.classList.add("price-invalid");
 
       if (priceError) {
-        priceError.textContent = price > maxPrice
-          ? "⚠ Giá bán vượt giới hạn! Tối đa " +
-            money(maxPrice) + "."
-          : "⚠ Vui lòng nhập giá hợp lệ từ 1.000đ.";
+        priceError.textContent =
+          price > maximum
+            ? "⚠ Giá vượt mức cho phép: " + money(maximum)
+            : "⚠ Giá bán phải từ 1.000đ và không vượt trần.";
 
         priceError.classList.add("show");
       }
-
-      submitBtn.disabled = true;
-      return false;
     }
 
-    priceInput.classList.add("price-valid");
-    submitBtn.disabled = false;
-    return true;
+    if (valid) {
+      priceInput.classList.add("price-valid");
+    }
+
+    submitBtn.disabled = !valid;
+    return valid;
   }
 
-  select.addEventListener("change", validateResalePrice);
-  priceInput.addEventListener("input", validateResalePrice);
-
-  function renderOwnedTickets() {
-    const available = getAvailableTickets();
-
-    select.replaceChildren();
-
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = "-- Chọn vé --";
-    select.appendChild(placeholder);
-
-    available.forEach((ticket, index) => {
-      const option = document.createElement("option");
-      option.value = String(index);
-
-      option.textContent =
-        ticket.eventTitle + " — " +
-        ticket.ticketName + " — " +
-        money(ticket.originalPrice);
-
-      select.appendChild(option);
-    });
-
-    select.disabled = available.length === 0;
-    submitBtn.disabled = true;
-    validateResalePrice();
+  function getActiveListings() {
+    return getListings()
+      .filter(item => item.status === "active")
+      .filter(item =>
+        !selectedEventId ||
+        normalize(item.eventId) === selectedEventId
+      )
+      .reverse();
   }
 
   function renderListings() {
-    const listings = getListings()
-      .filter(item => item.status === "active")
-      .reverse();
-
     list.replaceChildren();
 
-    if (listings.length === 0) {
+    const listings = getActiveListings();
+    const user = verifiedUser();
+
+    if (!listings.length) {
       const empty = document.createElement("p");
       empty.className = "muted";
-      empty.textContent = "Chưa có vé nào được đăng bán.";
+      empty.textContent =
+        "Chưa có vé nào được đăng bán cho sự kiện này.";
       list.appendChild(empty);
       return;
     }
@@ -237,11 +369,22 @@
       card.className = "listing";
 
       const title = document.createElement("h3");
-      title.textContent = item.eventTitle;
+      title.textContent = item.eventTitle || "Sự kiện";
 
       const type = document.createElement("p");
       type.className = "muted";
       type.textContent = "Loại vé: " + item.ticketName;
+
+      const original = getOriginalPrice(
+        item.eventId,
+        item.ticketId,
+        item.originalPrice
+      );
+
+      const originalText = document.createElement("p");
+      originalText.className = "muted";
+      originalText.textContent =
+        "Giá gốc: " + money(original);
 
       const price = document.createElement("div");
       price.className = "price";
@@ -249,57 +392,100 @@
 
       const tag = document.createElement("span");
       tag.className = "tag";
-      tag.textContent = "Đang bán";
+      tag.textContent = "Vé chuyển nhượng chính thức (DEMO)";
 
       const buy = document.createElement("button");
       buy.type = "button";
       buy.className = "btn";
-      buy.textContent = "Mua lại (DEMO)";
+
+      const ownListing = Boolean(
+        user &&
+        (
+          item.ownerUserId === user.id ||
+          (
+            !item.ownerUserId &&
+            getOrders().some(order =>
+              normalize(order.id) === normalize(item.orderId) &&
+              order.buyer?.userId === user.id
+            )
+          )
+        )
+      );
+
+      buy.textContent = ownListing
+        ? "Vé do bạn đăng bán"
+        : "Mua lại (DEMO)";
+
+      buy.disabled = ownListing;
 
       buy.addEventListener("click", () => {
-        const all = getListings();
-        const target = all.find(x => x.id === item.id);
+        const activeUser = verifiedUser();
+
+        if (!activeUser) {
+          location.href =
+            "auth.html?return=" +
+            encodeURIComponent("resale.html");
+          return;
+        }
+
+        const target = getListings().find(
+          x => normalize(x.id) === normalize(item.id)
+        );
 
         if (!target || target.status !== "active") {
-          alert("Vé này không còn được bán.");
+          alert("Tin đăng không còn hoạt động.");
           renderListings();
           return;
         }
 
-        const original = getOriginalPrice(
+        const sellerOrder = getOrders().find(
+          order =>
+            normalize(order.id) === normalize(target.orderId)
+        );
+
+        if (
+          target.ownerUserId === activeUser.id ||
+          sellerOrder?.buyer?.userId === activeUser.id
+        ) {
+          alert("Bạn không thể tự mua vé của mình.");
+          return;
+        }
+
+        const official = getOriginalPrice(
           target.eventId,
           target.ticketId,
           target.originalPrice
         );
 
         const resalePrice = Number(target.resalePrice);
-        const maxPrice = Math.floor(original * 110 / 100);
 
         if (
-          !Number.isFinite(original) ||
-          original <= 0 ||
+          official <= 0 ||
           !Number.isSafeInteger(resalePrice) ||
           resalePrice < 1000 ||
-          resalePrice > maxPrice
+          resalePrice > Math.floor(official * 1.1)
         ) {
-          alert(
-            "Tin đăng không hợp lệ hoặc vượt giới hạn 110%."
-          );
+          alert("Giá bán lại không hợp lệ.");
           return;
         }
 
-        // Chỉ tạo đơn tạm, CHƯA đánh dấu đã bán.
         const draft = {
           type: "resale",
           resaleId: target.id,
           eventId: target.eventId,
           eventTitle: target.eventTitle,
-          buyer: {},
+          buyer: {
+            userId: activeUser.id,
+            verifiedIdentityId:
+              activeUser.verifiedIdentityId,
+            name: activeUser.name,
+            email: activeUser.email
+          },
           items: [{
             ticketTypeId: target.ticketId,
             name: target.ticketName,
             price: resalePrice,
-            originalPrice: original,
+            originalPrice: official,
             quantity: 1
           }],
           total: resalePrice,
@@ -311,84 +497,39 @@
           JSON.stringify(draft)
         );
 
-        // Tránh dùng lại đồng hồ từ đơn thanh toán trước.
         sessionStorage.removeItem(
           "tt_payment_deadline_resale_" + target.id
         );
 
-        window.location.href =
+        location.href =
           "payment.html?id=" +
           encodeURIComponent(target.eventId) +
           "&resale=" +
           encodeURIComponent(target.id);
       });
 
-      card.append(title, type, price, tag, buy);
+      card.append(
+        title,
+        type,
+        originalText,
+        price,
+        tag,
+        buy
+      );
+
       list.appendChild(card);
     });
   }
 
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-
-    if (!validateResalePrice()) return;
-
-    const ticket = getSelectedTicket();
-    if (!ticket) return;
-
-    const price = Number(priceInput.value);
-    const original = Number(ticket.originalPrice);
-    const maxPrice = Math.floor(original * 110 / 100);
-
-    if (
-      !Number.isSafeInteger(price) ||
-      price < 1000 ||
-      original <= 0 ||
-      price > maxPrice
-    ) {
-      validateResalePrice();
-      return;
-    }
-
-    const listings = getListings();
-
-    listings.push({
-      id: "RES-" + Date.now(),
-      ...ticket,
-      resalePrice: price,
-      status: "active",
-      createdAt: new Date().toISOString()
-    });
-
-    saveListings(listings);
-
-    // Thông báo ngay trên trang, không dùng alert.
-    form.reset();
-    renderOwnedTickets();
-    renderListings();
-
-    const message = document.createElement("div");
-    message.className = "notice";
-    message.style.background = "#164b31";
-    message.style.color = "#b8ff35";
-    message.textContent =
-      "✓ Đăng bán vé thành công (DEMO)!";
-
-    const old = form.querySelector(".resale-success");
-    if (old) old.remove();
-
-    message.classList.add("resale-success");
-    form.appendChild(message);
-  });
-
   function renderResaleEvents() {
-    const grid = document.getElementById("resaleEventGrid");
     if (!grid) return;
 
-    const events = window.TT_SEED_EVENTS || [];
     grid.replaceChildren();
 
-    events.forEach(event => {
+    getEvents().filter(event =>
+      !["pending", "rejected", "draft", "hidden", "ended"]
+        .includes(event.status)
+    ).forEach(event => {
       const card = document.createElement("button");
       card.type = "button";
       card.className = "resale-event-card";
@@ -406,13 +547,107 @@
       card.append(image, title, date);
 
       card.addEventListener("click", () => {
-        document.getElementById("market")
-          ?.scrollIntoView({ behavior: "smooth" });
+        selectedEventId =
+          selectedEventId === normalize(event.id)
+            ? ""
+            : normalize(event.id);
+
+        renderListings();
+
+        $("market")?.scrollIntoView({
+          behavior: "smooth"
+        });
       });
 
       grid.appendChild(card);
     });
   }
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const user = verifiedUser();
+
+    if (!user) {
+      showFormNotice("Bạn cần xác minh eKYC.", true);
+      return;
+    }
+
+    if (!validateResalePrice()) return;
+
+    // Đọc lại dữ liệu ngay trước khi đăng.
+    const ticket = getAvailableTickets().find(
+      item => item.unitKey === select.value
+    );
+
+    if (!ticket) {
+      showFormNotice(
+        "Vé này không còn đủ điều kiện đăng bán.",
+        true
+      );
+      renderOwnedTickets();
+      return;
+    }
+
+    const price = Number(priceInput.value);
+    const maximum = Math.floor(ticket.originalPrice * 1.1);
+
+    if (
+      !Number.isSafeInteger(price) ||
+      price < 1000 ||
+      price > maximum
+    ) {
+      validateResalePrice();
+      return;
+    }
+
+    const listings = getListings();
+
+    if (listings.some(item =>
+      item.unitKey === ticket.unitKey &&
+      ["active", "sold"].includes(item.status)
+    )) {
+      showFormNotice("Vé đã được đăng bán trước đó.", true);
+      renderOwnedTickets();
+      return;
+    }
+
+    listings.push({
+      id: "RES-" +
+        Date.now() + "-" +
+        Math.random().toString(36).slice(2, 8),
+      ...ticket,
+      ownerUserId: user.id,
+      ownerIdentityId: user.verifiedIdentityId,
+      resalePrice: price,
+      status: "active",
+      createdAt: new Date().toISOString()
+    });
+
+    try {
+      localStorage.setItem(
+        "tt_resales",
+        JSON.stringify(listings)
+      );
+    } catch {
+      showFormNotice("Không lưu được tin đăng.", true);
+      return;
+    }
+
+    form.reset();
+    renderOwnedTickets();
+    renderListings();
+
+    showFormNotice("✓ Đăng bán vé thành công (DEMO)!");
+  });
+
+  select.addEventListener("change", validateResalePrice);
+  priceInput.addEventListener("input", validateResalePrice);
+
+  window.addEventListener("focus", () => {
+    renderOwnedTickets();
+    renderListings();
+  });
 
   renderResaleEvents();
   renderOwnedTickets();
