@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ban tổ chức | Ticketbox</title>
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --sidebar: #111a20;
+      --panel: #19222b;
+      --border: #2c3b46;
+      --green: #27c477;
+      --text: #f4f7f8;
+      --muted: #a4b2ba;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button { cursor: pointer; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      padding: 28px 16px;
+    }
+
+    .brand {
+      display: block;
+      color: var(--green);
+      font-size: 27px;
+      font-weight: 900;
+      margin: 0 12px 35px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 13px 15px;
+      margin-bottom: 6px;
+      border-radius: 10px;
+      color: var(--muted);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: #203a30;
+      color: var(--green);
+    }
+
+    .main {
+      padding: 32px;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    h1 { margin: 0 0 8px; font-size: 29px; }
+    h2 { margin: 0 0 18px; font-size: 21px; }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--green);
+      color: #07160f;
+      border: none;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-weight: 700;
+    }
+
+    .btn.outline {
+      background: transparent;
+      color: var(--green);
+      border: 1px solid var(--green);
+    }
+
+    .btn.small {
+      padding: 8px 11px;
+      font-size: 12px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat, .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 22px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--green);
+      font-size: 27px;
+      margin-top: 12px;
+    }
+
+    .panel { margin-bottom: 25px; }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 650px;
+    }
+
+    th, td {
+      padding: 14px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #204632;
+      color: #70e7a6;
+      font-size: 12px;
+    }
+
+    .status.closed {
+      background: #503035;
+      color: #ff9999;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      background: #101820;
+      border: 1px solid #40515b;
+      border-radius: 8px;
+      color: white;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    .ticket-row {
+      display: grid;
+      grid-template-columns: 1fr 150px 130px auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .message {
+      color: var(--green);
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 1050px) {
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 750px) {
+      .layout { grid-template-columns: 1fr; }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 15px;
+      }
+
+      .brand { margin: 0 0 12px; }
+
+      .nav-link {
+        display: inline-block;
+        margin: 3px;
+      }
+
+      .main { padding: 18px; }
+      .form-grid { grid-template-columns: 1fr; }
+
+      .ticket-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .topbar { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <aside class="sidebar">
+      <a href="organizer.html" class="brand">
+        ticketbox
+      </a>
+
+      <a href="#dashboard" class="nav-link active">
+        📊 Tổng quan
+      </a>
+
+      <a href="#events" class="nav-link">
+        📅 Sự kiện của tôi
+      </a>
+
+      <a href="#create" class="nav-link">
+        ➕ Tạo sự kiện
+      </a>
+
+      <a href="#orders" class="nav-link">
+        🎟️ Đơn hàng
+      </a>
+
+      <a href="index.html" class="nav-link">
+        ← Trang khách hàng
+      </a>
+    </aside>
+
+    <main class="main">
+
+      <header class="topbar" id="dashboard">
+        <div>
+          <h1>Ban tổ chức</h1>
+          <p class="muted">
+            Quản lý sự kiện, vé và doanh thu
+          </p>
+        </div>
+
+        <a href="#create" class="btn">
+          + Tạo sự kiện
+        </a>
+      </header>
+
+      <section class="stats">
+        <div class="stat">
+          <span class="muted">Sự kiện</span>
+          <strong id="statEvents">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Vé đã bán</span>
+          <strong id="statTickets">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Đơn hàng</span>
+          <strong id="statOrders">0</strong>
+        </div>
+
+        <div class="stat">
+          <span class="muted">Doanh thu demo</span>
+          <strong id="statRevenue">0 đ</strong>
+        </div>
+      </section>
+
+      <section class="panel" id="events">
+        <h2>Danh sách sự kiện</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tên sự kiện</th>
+                <th>Ngày</th>
+                <th>Địa điểm</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="eventTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="create">
+        <h2>Tạo sự kiện mới</h2>
+
+        <form id="eventForm">
+          <div class="form-grid">
+
+            <div>
+              <label for="eventName">
+                Tên sự kiện
+              </label>
+              <input id="eventName" required>
+            </div>
+
+            <div>
+              <label for="eventDate">
+                Ngày tổ chức
+              </label>
+              <input
+                id="eventDate"
+                type="date"
+                required
+              >
+            </div>
+
+            <div>
+              <label for="eventTime">
+                Giờ bắt đầu
+              </label>
+              <input
+                id="eventTime"
+                type="time"
+                required
+              >
+            </div>
+
+            <div>
+              <label for="eventCity">
+                Thành phố
+              </label>
+              <input
+                id="eventCity"
+                placeholder="Hà Nội"
+                required
+              >
+            </div>
+
+            <div class="full">
+              <label for="eventVenue">
+                Địa điểm tổ chức
+              </label>
+              <input id="eventVenue" required>
+            </div>
+
+            <div class="full">
+              <label for="eventImage">
+                URL ảnh poster
+              </label>
+              <input
+                id="eventImage"
+                type="url"
+                placeholder="https://..."
+              >
+            </div>
+
+            <div class="full">
+              <label for="eventDescription">
+                Mô tả sự kiện
+              </label>
+              <textarea id="eventDescription"></textarea>
+            </div>
+
+          </div>
+
+          <h2 style="margin-top:28px">
+            Các loại vé
+          </h2>
+
+          <div id="ticketRows"></div>
+
+          <button
+            type="button"
+            id="addTicket"
+            class="btn outline"
+          >
+            + Thêm loại vé
+          </button>
+
+          <div style="margin-top:22px">
+            <button type="submit" class="btn">
+              Lưu sự kiện
+            </button>
+          </div>
+
+          <p id="formMessage" class="message"></p>
+        </form>
+      </section>
+
+      <section class="panel" id="orders">
+        <h2>Đơn hàng đã thanh toán</h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã đơn</th>
+                <th>Sự kiện</th>
+                <th>Người mua</th>
+                <th>Số vé</th>
+                <th>Tổng tiền</th>
+              </tr>
+            </thead>
+            <tbody id="orderTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <p class="muted">
+        Trang Ban tổ chức — chế độ demo.
+        Dữ liệu được lưu trong trình duyệt.
+      </p>
+
+    </main>
+  </div>
+
+  <script src="data.js?v=4"></script>
+  <script src="organizer.js?v=1"></script>
+</body>
+</html>
