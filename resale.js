@@ -3,6 +3,69 @@
   const form = document.getElementById("resaleForm");
   const select = document.getElementById("ownedTicket");
   const priceInput = document.getElementById("resalePrice");
+  
+  const priceInfo = document.getElementById("priceInfo");
+  const priceError = document.getElementById("priceError");
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  function validateResalePrice() {
+    const available = getAvailableTickets();
+    const ticket = available[Number(select.value)];
+    const price = Number(priceInput.value);
+
+    priceInput.classList.remove("price-invalid", "price-valid");
+    priceError.classList.remove("show");
+    priceError.textContent = "";
+
+    if (!ticket) {
+      priceInfo.textContent =
+        "Chọn vé để xem giá bán lại tối đa.";
+      submitBtn.disabled = true;
+      return false;
+    }
+
+    const original = Number(ticket.originalPrice);
+    const maxPrice = Math.floor(original * 110 / 100);
+
+    if (!Number.isFinite(original) || original <= 0) {
+      priceInfo.textContent = "Không xác định được giá gốc.";
+      submitBtn.disabled = true;
+      return false;
+    }
+
+    priceInfo.textContent =
+      "Giá gốc: " + money(original) +
+      " · Giá tối đa (110%): " + money(maxPrice);
+
+    if (priceInput.value.trim() === "") {
+      submitBtn.disabled = true;
+      return false;
+    }
+
+    const invalid = !Number.isSafeInteger(price) ||
+      price < 1000 || price > maxPrice;
+
+    if (invalid) {
+      priceInput.classList.add("price-invalid");
+
+      priceError.textContent = price > maxPrice
+        ? "⚠ Giá bán vượt giới hạn! Tối đa " +
+          money(maxPrice) + "."
+        : "⚠ Vui lòng nhập giá hợp lệ từ 1.000đ.";
+
+      priceError.classList.add("show");
+      submitBtn.disabled = true;
+      return false;
+    }
+
+    priceInput.classList.add("price-valid");
+    submitBtn.disabled = false;
+    return true;
+  }
+
+  select.addEventListener("change", validateResalePrice);
+  priceInput.addEventListener("input", validateResalePrice);
+
   const list = document.getElementById("resaleList");
 
   const money = value =>
@@ -84,6 +147,7 @@
 
     form.querySelector('button[type="submit"]').disabled =
       available.length === 0;
+    validateResalePrice();
   }
 
   function renderListings() {
