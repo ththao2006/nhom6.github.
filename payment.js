@@ -1,18 +1,29 @@
 
 (() => {
   const $ = id => document.getElementById(id);
+
   const money = n =>
     new Intl.NumberFormat("vi-VN").format(n) + " đ";
 
+  function readArray(key) {
+    try {
+      const data = JSON.parse(
+        localStorage.getItem(key) || "[]"
+      );
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
+    }
+  }
+
   const params = new URLSearchParams(location.search);
   const eventId = params.get("id") || "ev001";
+  const resaleId = params.get("resale");
 
-  let events = window.TT_SEED_EVENTS || [];
-
-  try {
-    const saved = JSON.parse(localStorage.getItem("tt_events"));
-    if (Array.isArray(saved)) events = saved;
-  } catch {}
+  // Ưu tiên dữ liệu sự kiện mới trong data.js.
+  const seed = window.TT_SEED_EVENTS || [];
+  const savedEvents = readArray("tt_events");
+  const events = [...seed, ...savedEvents];
 
   const event = events.find(e => e.id === eventId);
 
@@ -23,44 +34,138 @@
   }
 
   $("eventTitle").textContent = event.title;
+
   $("eventDate").textContent =
     "📅 " + event.date + " · " + (event.time || "");
+
   $("eventVenue").textContent =
     "📍 " + event.venue + " · " + event.location;
 
-  $("backLink").href =
-    "checkout.html?id=" + encodeURIComponent(event.id);
-
   document.title = "Thanh toán | " + event.title;
 
-  // Chỉ dùng đơn hàng tạm khi sau này
-  // kết nối từ trang checkout.
   let draft = null;
 
   try {
-    draft = JSON.parse(sessionStorage.getItem("tt_payment_draft"));
+    draft = JSON.parse(
+      sessionStorage.getItem("tt_payment_draft")
+    );
   } catch {}
 
-  const validDraft =
+  const isResale = Boolean(resaleId);
+
+  // Xác định giá gốc do BTC công bố.
+  function getOriginalPrice(ticketId, fallback) {
+    const type = (event.ticketTypes || [])
+      .find(t => t.id === ticketId);
+
+    const original = Number(type?.price);
+
+    if (Number.isFinite(original) && original > 0) {
+      return original;
+    }
+
+    const backup = Number(fallback);
+    return Number.isFinite(backup) && backup > 0
+      ? backup
+      : 0;
+  }
+
+  function getResaleListing() {
+    if (!resaleId) return null;
+
+    return readArray("tt_resales").find(item =>
+      item.id === resaleId &&
+      item.eventId === event.id &&
+      item.status === "active"
+    ) || null;
+  }
+
+  function validResaleListing(item) {
+    if (!item) return false;
+
+    const original = getOriginalPrice(
+      item.ticketId,
+      item.originalPrice
+    );
+
+    const price = Number(item.resalePrice);
+    const maxPrice = Math.floor(original * 110 / 100);
+
+    return (
+      original > 0 &&
+      Number.isSafeInteger(price) &&
+      price >= 1000 &&
+      price <= maxPrice
+    );
+  }
+
+  let resaleListing = null;
+
+  if (isResale) {
+    resaleListing = getResaleListing();
+
+    if (!validResaleListing(resaleListing)) {
+      $("paymentApp").classList.add("hidden");
+      $("eventTitle").textContent =
+        "Vé bán lại không còn hợp lệ";
+      return;
+    }
+  }
+
+  const validDraft = Boolean(
     draft &&
     draft.eventId === event.id &&
     Array.isArray(draft.items) &&
-    draft.items.length > 0;
+    draft.items.length > 0 &&
+    (
+      isResale
+        ? draft.type === "resale" &&
+          draft.resaleId === resaleId
+        : draft.type !== "resale"
+    )
+  );
 
-  // Chế độ xem thử khi mở payment.html trực tiếp.
-  const items = validDraft
-    ? draft.items
-    : [{
-        ticketTypeId: event.ticketTypes[0].id,
-        name: event.ticketTypes[0].name,
-        price: event.ticketTypes[0].price,
+  // Với vé bán lại, luôn lấy giá từ tin đăng,
+  // không tin giá gửi qua URL hoặc sessionStorage.
+  const items = isResale
+    ? [{
+        ticketTypeId: resaleListing.ticketId,
+        name: resaleListing.ticketName,
+        price: Number(resaleListing.resalePrice),
+        originalPrice: getOriginalPrice(
+          resaleListing.ticketId,
+          resaleListing.originalPrice
+        ),
         quantity: 1
-      }];
+      }]
+    : validDraft
+      ? draft.items
+      : [{
+          ticketTypeId: event.ticketTypes[0].id,
+          name: event.ticketTypes[0].name,
+          price: event.ticketTypes[0].price,
+          quantity: 1
+        }];
 
   const buyer = validDraft ? (draft.buyer || {}) : {};
 
   if (buyer.email) {
     $("receiverEmail").value = buyer.email;
+  }
+
+  $("backLink").href = isResale
+    ? "resale.html"
+    : "checkout.html?id=" +
+      encodeURIComponent(event.id);
+
+  if (isResale) {
+    // Cho người mua biết đây là giao dịch bán lại.
+    const badge = document.createElement("span");
+    badge.textContent = " • VÉ BÁN LẠI";
+    badge.style.color = "#27c477";
+    badge.style.fontWeight = "bold";
+    badge.style.fontSize = "13px";
+    $("eventTitle").appendChild(badge);
   }
 
   const subtotal = items.reduce(
@@ -80,11 +185,13 @@
     row.className = "summary-row";
 
     const name = document.createElement("span");
-    name.textContent = item.name + " × " + item.quantity;
+    name.textContent =
+      item.name + " × " + item.quantity;
 
     const price = document.createElement("strong");
-    price.textContent =
-      money(Number(item.price) * Number(item.quantity));
+    price.textContent = money(
+      Number(item.price) * Number(item.quantity)
+    );
 
     row.append(name, price);
     $("ticketSummary").appendChild(row);
@@ -92,49 +199,87 @@
 
   function updateTotal() {
     $("subtotal").textContent = money(subtotal);
-    $("discount").textContent =
-      discount ? "−" + money(discount) : "0 đ";
-    $("grandTotal").textContent = money(subtotal - discount);
+
+    $("discount").textContent = discount
+      ? "−" + money(discount)
+      : "0 đ";
+
+    $("grandTotal").textContent =
+      money(subtotal - discount);
   }
 
   function updateButton() {
     $("payButton").disabled =
-      !$("agreeTerms").checked || expired || completed;
+      !$("agreeTerms").checked ||
+      expired ||
+      completed;
   }
 
   updateTotal();
   updateButton();
 
-  $("agreeTerms").addEventListener("change", updateButton);
+  $("agreeTerms").addEventListener(
+    "change",
+    updateButton
+  );
+
+  // Vé bán lại không áp dụng mã giảm giá demo.
+  if (isResale) {
+    $("voucherInput").disabled = true;
+    $("applyVoucher").disabled = true;
+
+    $("voucherMessage").textContent =
+      "Mã giảm giá không áp dụng cho vé bán lại.";
+    $("voucherMessage").className = "message";
+  }
 
   $("applyVoucher").addEventListener("click", () => {
-    const code = $("voucherInput").value.trim().toUpperCase();
+    if (isResale) return;
+
+    const code = $("voucherInput")
+      .value.trim().toUpperCase();
 
     if (code === "DEMO10") {
       discount = Math.round(subtotal * 0.1);
+
       $("voucherMessage").textContent =
         "Đã áp dụng giảm giá 10%!";
-      $("voucherMessage").className = "message success";
+      $("voucherMessage").className =
+        "message success";
     } else {
       discount = 0;
+
       $("voucherMessage").textContent =
         "Mã không hợp lệ. Thử DEMO10.";
-      $("voucherMessage").className = "message error";
+      $("voucherMessage").className =
+        "message error";
     }
 
     updateTotal();
   });
 
-  // Đồng hồ 15 phút, giữ thời hạn qua lần tải lại.
-  const deadlineKey = "tt_payment_deadline_" + event.id;
-  let deadline = Number(sessionStorage.getItem(deadlineKey));
+  // Đồng hồ riêng cho từng giao dịch bán lại.
+  const deadlineKey = isResale
+    ? "tt_payment_deadline_resale_" + resaleId
+    : "tt_payment_deadline_" + event.id;
+
+  let deadline = Number(
+    sessionStorage.getItem(deadlineKey)
+  );
 
   if (!deadline || !Number.isFinite(deadline)) {
     deadline = Date.now() + 15 * 60 * 1000;
-    sessionStorage.setItem(deadlineKey, String(deadline));
+
+    sessionStorage.setItem(
+      deadlineKey,
+      String(deadline)
+    );
   }
 
-  const timerInterval = setInterval(updateTimer, 1000);
+  const timerInterval = setInterval(
+    updateTimer,
+    1000
+  );
 
   function updateTimer() {
     const remaining = Math.max(
@@ -153,9 +298,11 @@
       clearInterval(timerInterval);
       expired = true;
       updateButton();
+
       $("paymentMessage").textContent =
         "Hết thời gian giữ vé. Hãy chọn lại vé.";
-      $("paymentMessage").className = "message error";
+      $("paymentMessage").className =
+        "message error";
     }
   }
 
@@ -164,20 +311,32 @@
   $("payButton").addEventListener("click", () => {
     if (expired || completed) return;
 
-    const email = $("receiverEmail").value.trim();
+    const email = $("receiverEmail")
+      .value.trim();
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       $("paymentMessage").textContent =
         "Vui lòng nhập email nhận vé hợp lệ.";
-      $("paymentMessage").className = "message error";
+      $("paymentMessage").className =
+        "message error";
+
       $("receiverEmail").focus();
       return;
     }
 
-    const method = document.querySelector(
+    const checkedMethod = document.querySelector(
       'input[name="method"]:checked'
-    ).value;
+    );
 
+    if (!checkedMethod) {
+      $("paymentMessage").textContent =
+        "Vui lòng chọn phương thức thanh toán.";
+      $("paymentMessage").className =
+        "message error";
+      return;
+    }
+
+    const method = checkedMethod.value;
     const total = subtotal - discount;
 
     $("paymentApp").classList.add("hidden");
@@ -190,9 +349,11 @@
     screen.className = "qr-screen";
 
     const title = document.createElement("h2");
-    title.textContent = "Xác nhận thanh toán demo";
+    title.textContent =
+      "Xác nhận thanh toán demo";
 
     const methodText = document.createElement("p");
+
     const methodNames = {
       vnpay: "VNPAY",
       vietqr: "VietQR",
@@ -202,7 +363,8 @@
     };
 
     methodText.textContent =
-      "Phương thức: " + methodNames[method];
+      "Phương thức: " +
+      (methodNames[method] || method);
 
     const amount = document.createElement("h2");
     amount.textContent = money(total);
@@ -212,9 +374,9 @@
     note.textContent =
       "Mã QR minh họa, không dùng để chuyển tiền thật.";
 
-    // Hình QR cách điệu, KHÔNG phải QR ngân hàng.
     const qr = document.createElement("div");
     qr.className = "qr-visual";
+
     qr.innerHTML = `
       <svg viewBox="0 0 100 100"
            xmlns="http://www.w3.org/2000/svg">
@@ -238,15 +400,52 @@
       </svg>
     `;
 
-    const confirm = document.createElement("button");
-    confirm.className = "pay-button";
-    confirm.textContent = "Xác nhận đã thanh toán (DEMO)";
+    const confirmButton = document.createElement(
+      "button"
+    );
 
-    confirm.addEventListener("click", () => {
+    confirmButton.className = "pay-button";
+    confirmButton.textContent =
+      "Xác nhận đã thanh toán (DEMO)";
+
+    confirmButton.addEventListener("click", () => {
       if (completed || expired) return;
+
+      // Kiểm tra lại tin đăng ngay trước khi lưu.
+      let currentListing = null;
+      let listings = [];
+
+      if (isResale) {
+        listings = readArray("tt_resales");
+
+        currentListing = listings.find(x =>
+          x.id === resaleId &&
+          x.eventId === event.id &&
+          x.status === "active"
+        );
+
+        if (
+          !validResaleListing(currentListing) ||
+          Number(currentListing.resalePrice) !== subtotal ||
+          currentListing.ticketId !== items[0].ticketTypeId
+        ) {
+          confirmButton.disabled = true;
+
+          const error = document.createElement("p");
+          error.style.color = "#ff6666";
+          error.textContent =
+            "Vé đã được bán hoặc thông tin giá đã thay đổi. " +
+            "Vui lòng quay lại trang bán lại.";
+
+          screen.appendChild(error);
+          return;
+        }
+      }
 
       const order = {
         id: "ORD-" + Date.now(),
+        type: isResale ? "resale" : "original",
+        resaleId: isResale ? resaleId : null,
         eventId: event.id,
         eventTitle: event.title,
         buyer: {
@@ -254,9 +453,16 @@
           email
         },
         items: items.map(item => ({
+          id: item.ticketTypeId,
           ticketTypeId: item.ticketTypeId,
           name: item.name,
           price: Number(item.price),
+          originalPrice: isResale
+            ? getOriginalPrice(
+                item.ticketTypeId,
+                item.originalPrice
+              )
+            : Number(item.price),
           quantity: Number(item.quantity)
         })),
         subtotal,
@@ -269,17 +475,29 @@
       };
 
       try {
-        const saved = JSON.parse(
-          localStorage.getItem("tt_orders") || "[]"
-        );
-
-        const orders = Array.isArray(saved) ? saved : [];
+        const orders = readArray("tt_orders");
         orders.push(order);
 
         localStorage.setItem(
           "tt_orders",
           JSON.stringify(orders)
         );
+
+        if (isResale) {
+          currentListing.status = "sold";
+          currentListing.soldAt =
+            new Date().toISOString();
+
+          currentListing.buyerOrderId = order.id;
+          listings = listings.map(x =>
+            x.id === resaleId ? currentListing : x
+          );
+
+          localStorage.setItem(
+            "tt_resales",
+            JSON.stringify(listings)
+          );
+        }
       } catch {
         alert("Không thể lưu đơn hàng demo.");
         return;
@@ -287,32 +505,56 @@
 
       completed = true;
       clearInterval(timerInterval);
+
       sessionStorage.removeItem(deadlineKey);
       sessionStorage.removeItem("tt_payment_draft");
 
       screen.replaceChildren();
 
       const successTitle = document.createElement("h2");
-      successTitle.textContent = "✓ Thanh toán demo thành công!";
+      successTitle.textContent =
+        "✓ Thanh toán demo thành công!";
       successTitle.style.color = "#27c477";
 
       const orderInfo = document.createElement("p");
-      orderInfo.textContent = "Mã đơn hàng: " + order.id;
+      orderInfo.textContent =
+        "Mã đơn hàng: " + order.id;
 
       const successNote = document.createElement("p");
-      successNote.textContent =
-        "Đây là giao dịch mô phỏng, không có tiền thật được chuyển.";
+      successNote.textContent = isResale
+        ? "Bạn đã mua lại vé thành công trong chế độ demo."
+        : "Bạn đã mua vé thành công trong chế độ demo.";
 
-      const home = document.createElement("a");
-      home.href = "index.html";
-      home.textContent = "← Về trang chủ";
-      home.style.color = "#27c477";
+      const demoNote = document.createElement("p");
+      demoNote.textContent =
+        "Không có tiền thật được chuyển.";
+
+      const myTickets = document.createElement("a");
+      myTickets.href = "my-tickets.html";
+      myTickets.textContent = "🎟️ Xem vé của tôi";
+      myTickets.style.color = "#27c477";
+      myTickets.style.fontWeight = "bold";
+
+      const back = document.createElement("p");
+      const backLink = document.createElement("a");
+      backLink.href = isResale
+        ? "resale.html"
+        : "index.html";
+
+      backLink.textContent = isResale
+        ? "← Về sàn bán lại vé"
+        : "← Về trang chủ";
+
+      backLink.style.color = "#27c477";
+      back.appendChild(backLink);
 
       screen.append(
         successTitle,
         orderInfo,
         successNote,
-        home
+        demoNote,
+        myTickets,
+        back
       );
     });
 
@@ -322,10 +564,14 @@
       amount,
       qr,
       note,
-      confirm
+      confirmButton
     );
 
     result.appendChild(screen);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
   });
 })();
