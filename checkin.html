@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-in vé | Ticketbox Demo</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0d12;
+      color: #fff;
+    }
+    .wrap {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .back {
+      color: #b8ff35;
+      text-decoration: none;
+    }
+    h1 { margin-top: 25px; }
+    .muted { color: #a7afbd; line-height: 1.6; }
+    .panel {
+      background: #202631;
+      padding: 28px;
+      border-radius: 18px;
+      margin-top: 24px;
+      border: 1px solid #353d4a;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid #566171;
+      background: #10151e;
+      color: #fff;
+      font-size: 16px;
+    }
+    button {
+      border: 0;
+      background: #b8ff35;
+      color: #101510;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+    .result {
+      display: none;
+      margin-top: 22px;
+      padding: 18px;
+      border-radius: 12px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+    .result.success {
+      display: block;
+      background: #173e2a;
+      color: #b8ff35;
+    }
+    .result.error {
+      display: block;
+      background: #481e27;
+      color: #ffb5bd;
+    }
+    .result.info {
+      display: block;
+      background: #1c354d;
+      color: #c5e4ff;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a href="index.html" class="back">← Trang chủ</a>
+
+    <h1>🎫 Check-in vé DEMO</h1>
+    <p class="muted">
+      Trang dành cho nhân viên kiểm tra vé.
+      Nhập mã token trong QR để xác minh và
+      check-in. Mỗi mã chỉ được sử dụng một lần.
+    </p>
+
+    <section class="panel">
+      <form id="checkinForm">
+        <label for="qrToken">Mã QR / Token vé</label>
+
+        <input
+          id="qrToken"
+          type="text"
+          placeholder="Dán mã token của vé vào đây"
+          autocomplete="off"
+          required
+        >
+
+        <button type="submit" id="checkinButton">
+          Xác nhận check-in
+        </button>
+      </form>
+
+      <div id="checkinResult" class="result"
+           aria-live="polite"></div>
+    </section>
+
+    <p class="muted">
+      Lưu ý: Đây là hệ thống minh họa sử dụng
+      localStorage. Dữ liệu không tự đồng bộ
+      giữa các trình duyệt hoặc thiết bị.
+    </p>
+  </main>
+
+  <script src="ticket-core.js?v=1"></script>
+  <script src="checkin.js?v=1"></script>
+</body>
+</html>
