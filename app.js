@@ -6,6 +6,16 @@
   const read = (key, fallback) => { try { const v=JSON.parse(localStorage.getItem("tt_"+key)); return v ?? fallback; } catch { return fallback; } };
   const write = (key, val) => localStorage.setItem("tt_"+key, JSON.stringify(val));
   const clone = x => JSON.parse(JSON.stringify(x));
+  // Sự kiện mẫu/cũ vẫn được phép hiển thị.
+// Sự kiện mới phải được Admin duyệt.
+const isPublicEvent = e => {
+  return ![
+    "pending",
+    "rejected",
+    "draft",
+    "hidden"
+  ].includes(e.status);
+};
   let events = read("events", clone(window.TT_SEED_EVENTS));
   let artists = clone(window.TT_SEED_ARTISTS);
   let user = read("user", null);
@@ -108,8 +118,7 @@ function renderEvents() {
       matchesPrice &&
       matchesTime(e) &&
       matchesCategory &&
-      eventStatus(e) !== "draft" &&
-      e.status !== "hidden"
+      isPublicEvent(e)
     );
   });
 
@@ -130,11 +139,19 @@ function renderEvents() {
   function closeModal(){ $("#modalBackdrop").classList.add("hidden"); document.body.style.overflow=""; }
   function openEvent(id) {
     const e=events.find(x=>x.id===id); if(!e)return;
+    if (!isPublicEvent(e)) {
+  toast("Sự kiện chưa được công bố.");
+  return;
+}
     const status=eventStatus(e), soldOut=e.ticketTypes.every(t=>t.quantity<=0);
     modal(`<div class="modal-grid"><img class="modal-poster" src="${e.image}" alt=""><div><span class="eyebrow">${e.genre} · ${status==="ended"?"ĐÃ KẾT THÚC":status==="live"?"ĐANG DIỄN RA":"SẮP DIỄN RA"}</span><h2>${e.title}</h2><p>◷ ${dateText(e.date)} · ${e.time||"19:00"}</p><p>⌖ ${e.venue}, ${e.location}</p><p>${e.description}</p><div class="pill-row"><span class="pill">${e.organizer}</span><span class="pill">${e.ticketTypes.length} loại vé</span></div><h3>${money(e.price)} <small class="small-note">/ vé từ</small></h3>${status==="ended"?'<div class="notice">Sự kiện đã kết thúc, hiện không thể đặt vé.</div>':soldOut?'<div class="notice">Sự kiện đã hết vé.</div>':`<button class="button button-primary full" data-book="${e.id}">Chọn vé <span>→</span></button>`}<button class="button button-secondary full" data-share="${e.id}">Chia sẻ sự kiện ↗</button></div></div>`);
   }
   function openBooking(id) {
     const e=events.find(x=>x.id===id); if(!e)return;
+    if (!isPublicEvent(e)) {
+  toast("Sự kiện này chưa được Admin duyệt.");
+  return;
+}
     if(!user){toast("Đăng nhập demo trước khi đặt vé nhé.");openLogin("customer",()=>openBooking(id));return;}
     if(eventStatus(e)==="ended"){toast("Sự kiện đã kết thúc.");return;}
     const chosen={};
@@ -297,7 +314,7 @@ document.addEventListener("keydown", ev => {
     return events
       .filter(e =>
         eventStatus(e) === "upcoming" &&
-        e.status !== "hidden" &&
+isPublicEvent(e) &&
         Array.isArray(e.ticketTypes) &&
 e.ticketTypes.some(t => t.quantity > 0)
       )
