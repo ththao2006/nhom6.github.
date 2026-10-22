@@ -1,0 +1,471 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <title>Tài khoản & xác minh | Ticketbox</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #101116;
+      color: #fff;
+    }
+
+    .topbar {
+      padding: 20px 6%;
+      background: #191b22;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      color: #27c477;
+      font-size: 24px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .back {
+      color: #ddd;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .container {
+      width: min(100% - 32px, 490px);
+      margin: 55px auto;
+    }
+
+    .card {
+      background: #1d2029;
+      border: 1px solid #343944;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 27px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 21px;
+    }
+
+    .muted {
+      color: #adb3c0;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 24px 0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px;
+      border-radius: 9px;
+      border: 1px solid #444956;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: #27c477;
+      color: #101116;
+      border-color: #27c477;
+      font-weight: bold;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      background: #12141a;
+      border: 1px solid #444956;
+      border-radius: 9px;
+      color: white;
+      font-size: 15px;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #27c477;
+    }
+
+    button.primary {
+      width: 100%;
+      padding: 14px;
+      background: #27c477;
+      border: none;
+      border-radius: 9px;
+      color: #101116;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      border: 1px solid #555b68;
+      border-radius: 9px;
+      color: white;
+      cursor: pointer;
+      margin-top: 12px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .message {
+      padding: 12px;
+      border-radius: 9px;
+      margin-top: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      background: #333039;
+    }
+
+    .message.success {
+      color: #6be2a2;
+      background: rgba(39, 196, 119, .1);
+    }
+
+    .message.error {
+      color: #ff8e8e;
+      background: rgba(255, 80, 80, .1);
+    }
+
+    .status {
+      padding: 12px;
+      border-radius: 9px;
+      background: #303440;
+      margin: 18px 0;
+      font-weight: bold;
+    }
+
+    .status.verified {
+      color: #6be2a2;
+      background: rgba(39, 196, 119, .1);
+    }
+
+    .warning {
+      padding: 14px;
+      border-left: 3px solid #f1c65c;
+      background: rgba(241, 198, 92, .08);
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e8d8aa;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">ticketbox</a>
+    <a class="back" href="index.html">← Trang chủ</a>
+  </header>
+
+  <main class="container">
+    <section id="guestView" class="card">
+      <h1>Tài khoản của bạn</h1>
+
+      <p class="muted">
+        Đăng ký tài khoản để trải nghiệm hệ thống
+        xác minh danh tính và chống đầu cơ vé.
+      </p>
+
+      <div class="tabs">
+        <button class="tab active"
+                type="button"
+                id="loginTab">
+          Đăng nhập
+        </button>
+
+        <button class="tab"
+                type="button"
+                id="registerTab">
+          Đăng ký
+        </button>
+      </div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail"
+                 type="email"
+                 autocomplete="off"
+                 required>
+        </div>
+
+        <div class="field">
+          <label for="loginPassword">Mật khẩu demo</label>
+          <input id="loginPassword"
+                 type="password"
+                 required>
+        </div>
+
+        <button class="primary" type="submit">
+          Đăng nhập
+        </button>
+      </form>
+
+      <form id="registerForm" class="hidden">
+        <div class="field">
+          <label for="registerName">Họ và tên</label>
+          <input id="registerName" required>
+        </div>
+
+        <div class="field">
+          <label for="registerEmail">Email</label>
+          <input id="registerEmail"
+                 type="email"
+                 autocomplete="off"
+                 required>
+        </div>
+
+        <div class="field">
+          <label for="registerPassword">
+            Mật khẩu demo
+          </label>
+          <input id="registerPassword"
+                 type="password"
+                 minlength="6"
+                 required>
+        </div>
+
+        <button class="primary" type="submit">
+          Tạo tài khoản
+        </button>
+      </form>
+
+      <div id="guestMessage"
+           class="message hidden"
+           role="status"></div>
+    </section>
+
+    <section id="accountView" class="card hidden">
+      <h1>Hồ sơ tài khoản</h1>
+
+      <p class="muted" id="accountName"></p>
+      <p class="muted" id="accountEmail"></p>
+
+      <div id="verificationStatus"
+           class="status"></div>
+
+      <div id="verificationFormArea">
+        <h2>Xác minh danh tính (DEMO)</h2>
+
+        <p class="muted">
+          Hệ thống sử dụng mã danh tính giả lập
+          thay vì giấy tờ tùy thân thật.
+        </p>
+
+        <form id="verifyForm">
+          <div class="field">
+            <label for="identityCode">
+              Mã danh tính giả lập
+            </label>
+            <input
+              id="identityCode"
+              placeholder="DEMO-USER001"
+              autocomplete="off"
+              required>
+          </div>
+
+          <button class="primary" type="submit">
+            Xác minh danh tính
+          </button>
+        </form>
+
+        <p class="muted">
+          Ví dụ: DEMO-USER001, DEMO-USER002.
+          Hai tài khoản không thể dùng cùng
+          một mã danh tính demo.
+        </p>
+      </div>
+
+      <div id="accountMessage"
+           class="message hidden"
+           role="status"></div>
+
+      <button id="logoutButton"
+              class="secondary"
+              type="button">
+        Đăng xuất
+      </button>
+    </section>
+
+    <div class="warning">
+      ⚠️ Đây là eKYC giả lập dành cho đồ án.
+      Không nhập CCCD, mật khẩu thật hoặc dữ liệu
+      cá nhân nhạy cảm. Tài khoản và trạng thái
+      xác minh chỉ lưu trên trình duyệt hiện tại,
+      không có máy chủ xác thực.
+    </div>
+  </main>
+
+  <script src="auth.js"></script>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    function showMessage(target, message, success = false) {
+      const el = $(target);
+      el.textContent = message;
+      el.className = "message " +
+        (success ? "success" : "error");
+    }
+
+    function clearMessages() {
+      ["guestMessage", "accountMessage"].forEach(id => {
+        $(id).className = "message hidden";
+        $(id).textContent = "";
+      });
+    }
+
+    function showTab(tab) {
+      clearMessages();
+
+      const login = tab === "login";
+
+      $("loginForm").classList.toggle("hidden", !login);
+      $("registerForm").classList.toggle("hidden", login);
+
+      $("loginTab").classList.toggle("active", login);
+      $("registerTab").classList.toggle("active", !login);
+    }
+
+    $("loginTab").addEventListener("click", () => {
+      showTab("login");
+    });
+
+    $("registerTab").addEventListener("click", () => {
+      showTab("register");
+    });
+
+    function render() {
+      clearMessages();
+
+      const user = TT_AUTH.getCurrentUser();
+
+      $("guestView").classList.toggle("hidden", !!user);
+      $("accountView").classList.toggle("hidden", !user);
+
+      if (!user) return;
+
+      $("accountName").textContent =
+        "Họ tên: " + user.name;
+
+      $("accountEmail").textContent =
+        "Email: " + user.email;
+
+      $("verificationStatus").textContent = user.verified
+        ? "✓ Đã xác minh danh tính (DEMO)"
+        : "⚠ Chưa xác minh danh tính";
+
+      $("verificationStatus").classList.toggle(
+        "verified",
+        user.verified
+      );
+
+      $("verificationFormArea").classList.toggle(
+        "hidden",
+        user.verified
+      );
+    }
+
+    $("registerForm").addEventListener("submit", e => {
+      e.preventDefault();
+
+      try {
+        TT_AUTH.register({
+          name: $("registerName").value,
+          email: $("registerEmail").value,
+          password: $("registerPassword").value
+        });
+
+        $("registerForm").reset();
+        render();
+      } catch (error) {
+        showMessage("guestMessage", error.message);
+      }
+    });
+
+    $("loginForm").addEventListener("submit", e => {
+      e.preventDefault();
+
+      try {
+        TT_AUTH.login(
+          $("loginEmail").value,
+          $("loginPassword").value
+        );
+
+        $("loginForm").reset();
+        render();
+      } catch (error) {
+        showMessage("guestMessage", error.message);
+      }
+    });
+
+    $("verifyForm").addEventListener("submit", e => {
+      e.preventDefault();
+
+      try {
+        TT_AUTH.verifyIdentity(
+          $("identityCode").value
+        );
+
+        $("verifyForm").reset();
+        render();
+
+        showMessage(
+          "accountMessage",
+          "Xác minh danh tính demo thành công!",
+          true
+        );
+      } catch (error) {
+        showMessage("accountMessage", error.message);
+      }
+    });
+
+    $("logoutButton").addEventListener("click", () => {
+      TT_AUTH.logout();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
