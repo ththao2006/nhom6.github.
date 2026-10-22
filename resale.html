@@ -5,80 +5,31 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bán lại vé | Ticketbox</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
 
     body {
       margin: 0;
-      background: #0c0e13;
-      color: white;
+      background: #080808;
+      color: #fff;
       font: 15px/1.6 Arial, sans-serif;
     }
 
-    header {
-      background: #171b24;
-      border-bottom: 1px solid #303540;
-      padding: 17px 0;
-    }
-
     .container {
-      width: min(1100px, 92%);
+      width: min(1200px, 92%);
       margin: auto;
     }
 
-    .nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-    }
-
-    a { color: #b8ff35; text-decoration: none; }
-
-    .logo {
-      font-size: 25px;
-      font-weight: bold;
-    }
-
-    h1 { margin: 32px 0 5px; }
-
-    .muted { color: #aeb7c9; }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 25px;
-      margin: 30px 0 60px;
-      align-items: start;
-    }
-
-    .panel {
-      background: #191e28;
-      border: 1px solid #333c4b;
-      border-radius: 16px;
-      padding: 22px;
-    }
-
-    h2 { margin: 0 0 18px; }
-
-    label {
-      display: block;
-      margin: 15px 0 6px;
-      font-weight: bold;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 12px;
-      background: #10151e;
-      border: 1px solid #485163;
-      border-radius: 8px;
-      color: white;
-      font: inherit;
-    }
-
-    input:focus, select:focus {
-      outline: 1px solid #b8ff35;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
     button {
@@ -86,9 +37,222 @@
       font: inherit;
     }
 
+    /* HEADER */
+
+    header {
+      background: #25bd79;
+      padding: 16px 0;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 30px;
+      font-weight: bold;
+      letter-spacing: -1px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-weight: bold;
+    }
+
+    .nav-links a:hover {
+      opacity: .8;
+    }
+
+    /* BANNER */
+
+    .resale-banner {
+      background:
+        radial-gradient(
+          ellipse at 8% 115%,
+          #5bdc70 0 32%,
+          transparent 33%
+        ),
+        radial-gradient(
+          ellipse at 90% 120%,
+          #48ce65 0 37%,
+          transparent 38%
+        ),
+        linear-gradient(
+          135deg,
+          #006b35,
+          #009e47
+        );
+
+      min-height: 270px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .banner-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .banner-label {
+      display: inline-block;
+      background: #b8ff35;
+      color: #164a1e;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .resale-banner h1 {
+      font-size: clamp(36px, 6vw, 65px);
+      line-height: 1.1;
+      margin: 15px 0;
+      text-shadow: 3px 4px #004927;
+    }
+
+    .resale-banner p {
+      max-width: 470px;
+      color: #e9ffed;
+      font-size: 16px;
+    }
+
+    .banner-symbol {
+      font-size: clamp(100px, 16vw, 190px);
+      transform: rotate(-12deg);
+    }
+
+    /* TIÊU ĐỀ */
+
+    .section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 22px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .section-heading span {
+      color: #aeb7c9;
+      font-size: 13px;
+    }
+
+    /* DANH SÁCH SỰ KIỆN */
+
+    .resale-events {
+      padding: 38px 0 20px;
+    }
+
+    .event-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .resale-event-card {
+      background: #171b24;
+      border: 1px solid #303540;
+      border-radius: 13px;
+      overflow: hidden;
+      padding: 0;
+      color: white;
+      text-align: left;
+      transition: .2s;
+    }
+
+    .resale-event-card:hover {
+      border-color: #b8ff35;
+      transform: translateY(-4px);
+    }
+
+    .resale-event-card img {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      display: block;
+      background: #303540;
+    }
+
+    .resale-event-card strong {
+      display: block;
+      padding: 12px 12px 5px;
+      min-height: 64px;
+      font-size: 14px;
+    }
+
+    .resale-event-card small {
+      display: block;
+      padding: 0 12px 14px;
+      color: #b8ff35;
+    }
+
+    /* KHU VỰC BÁN LẠI */
+
+    .resale-market {
+      margin-top: 35px;
+      padding-bottom: 60px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns:
+        320px minmax(0, 1fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel {
+      background: #242428;
+      border: 1px solid #3c3c42;
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 18px;
+      font-size: 21px;
+    }
+
+    /* FORM ĐĂNG BÁN */
+
+    label {
+      display: block;
+      margin: 15px 0 6px;
+      font-weight: bold;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      background: #15171d;
+      border: 1px solid #4a4f59;
+      border-radius: 8px;
+      color: white;
+      font: inherit;
+    }
+
+    input:focus,
+    select:focus {
+      outline: 1px solid #b8ff35;
+    }
+
     .btn {
       display: inline-block;
-      padding: 11px 17px;
+      padding: 11px 16px;
       border-radius: 8px;
       border: 1px solid #b8ff35;
       background: transparent;
@@ -106,101 +270,262 @@
       cursor: not-allowed;
     }
 
-    .full { width: 100%; margin-top: 20px; }
-
-    .listing {
-      padding: 17px 0;
-      border-bottom: 1px solid #333c4b;
+    .full {
+      width: 100%;
+      margin-top: 20px;
     }
 
-    .listing:last-child { border-bottom: 0; }
+    .notice {
+      background: #303b4c;
+      color: #cbd5e1;
+      padding: 12px;
+      border-radius: 9px;
+      margin-top: 15px;
+      font-size: 13px;
+    }
 
-    .listing h3 { margin: 0 0 6px; }
+    /* DANH SÁCH VÉ */
+
+    #resaleList {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .listing {
+      background: #2b2b2d;
+      border: 1px solid #44444b;
+      border-radius: 12px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .listing h3 {
+      background: #3b3b40;
+      margin: -16px -16px 16px;
+      padding: 14px;
+      font-size: 15px;
+      min-height: 72px;
+    }
+
+    .listing .muted {
+      color: #c2c5cc;
+      margin: 8px 0;
+    }
 
     .price {
-      font-size: 21px;
-      color: #b8ff35;
+      color: #2bd080;
+      font-size: 23px;
       font-weight: bold;
-      margin: 10px 0;
+      margin: 12px 0;
     }
 
     .tag {
       display: inline-block;
+      padding: 4px 12px;
+      background: #2196f3;
+      color: white;
       border-radius: 20px;
-      background: #28422b;
-      color: #b8ff35;
-      padding: 3px 10px;
       font-size: 12px;
+      font-weight: bold;
     }
 
-    .notice {
-      padding: 12px;
-      border-radius: 9px;
-      background: #263043;
-      color: #cbd5e1;
+    .listing .btn {
+      background: #2196f3;
+      border: none;
+      color: white;
+      margin-top: 10px;
+    }
+
+    .muted {
+      color: #aeb7c9;
+    }
+
+    /* FOOTER */
+
+    footer {
+      background: #171b24;
+      border-top: 1px solid #303540;
+      text-align: center;
+      padding: 22px;
+      color: #aeb7c9;
       font-size: 13px;
-      margin-top: 15px;
     }
 
-    @media (max-width: 800px) {
-      .layout { grid-template-columns: 1fr; }
+    /* RESPONSIVE */
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .event-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .nav-links {
+        gap: 12px;
+        font-size: 13px;
+      }
+
+      .logo {
+        font-size: 23px;
+      }
+
+      .banner-symbol {
+        display: none;
+      }
+    }
+
+    @media (max-width: 520px) {
+      #resaleList {
+        grid-template-columns: 1fr;
+      }
+
+      .section-heading {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .resale-banner {
+        min-height: 230px;
+      }
     }
   </style>
 </head>
+
 <body>
+
+  <!-- THANH ĐIỀU HƯỚNG -->
   <header>
     <div class="container nav">
-      <a href="index.html" class="logo">Ticketbox</a>
-      <a href="my-tickets.html">🎟️ Vé của tôi</a>
+      <a href="index.html" class="logo">
+        ticketbox
+      </a>
+
+      <nav class="nav-links">
+        <a href="index.html">Trang chủ</a>
+        <a href="resale.html">Bán lại vé</a>
+        <a href="my-tickets.html">Vé của tôi</a>
+      </nav>
     </div>
   </header>
 
-  <main class="container">
-    <h1>🔄 Sàn bán lại vé</h1>
-    <p class="muted">
-      Đăng bán vé đã mua hoặc tìm vé từ người khác.
-    </p>
+  <!-- BANNER -->
+  <section class="resale-banner">
+    <div class="container banner-inner">
+      <div>
+        <span class="banner-label">
+          TICKETBOX RESALE
+        </span>
 
-    <div class="layout">
-      <section class="panel">
-        <h2>Đăng bán vé</h2>
+        <h1>VÉ BÁN LẠI</h1>
 
-        <form id="resaleForm">
-          <label for="ownedTicket">Chọn vé đã mua</label>
-          <select id="ownedTicket" required>
-            <option value="">-- Chọn vé --</option>
-          </select>
+        <p>
+          Khám phá sự kiện, tìm vé từ cộng đồng
+          và đăng bán những vé bạn không sử dụng.
+        </p>
+      </div>
 
-          <label for="resalePrice">Giá bán lại (VNĐ)</label>
-          <input
-            id="resalePrice"
-            type="number"
-            min="1000"
-            step="1000"
-            placeholder="Ví dụ: 1200000"
-            required
-          >
-
-          <div class="notice">
-            Đây là chức năng mô phỏng phục vụ bài tập.
-            Không thực hiện giao dịch tiền thật.
-          </div>
-
-          <button class="btn primary full" type="submit">
-            Đăng bán vé
-          </button>
-        </form>
-      </section>
-
-      <section class="panel">
-        <h2>Vé đang được bán lại</h2>
-        <div id="resaleList">
-          <p class="muted">Đang tải...</p>
-        </div>
-      </section>
+      <div class="banner-symbol">🎟️</div>
     </div>
+  </section>
+
+  <main class="container">
+
+    <!-- SỰ KIỆN -->
+    <section class="resale-events">
+      <div class="section-heading">
+        <h2>Khám phá sự kiện</h2>
+        <span>Chọn sự kiện để xem vé bán lại</span>
+      </div>
+
+      <div id="resaleEventGrid" class="event-grid">
+      </div>
+    </section>
+
+    <!-- CHỢ VÉ -->
+    <section class="resale-market" id="market">
+
+      <div class="section-heading">
+        <h2>Danh sách vé bán lại</h2>
+        <span>Giao dịch vé demo</span>
+      </div>
+
+      <div class="layout">
+
+        <!-- FORM ĐĂNG BÁN -->
+        <section class="panel">
+          <h2>Đăng bán vé</h2>
+
+          <form id="resaleForm">
+
+            <label for="ownedTicket">
+              Chọn vé đã mua
+            </label>
+
+            <select id="ownedTicket" required>
+              <option value="">
+                -- Chọn vé --
+              </option>
+            </select>
+
+            <label for="resalePrice">
+              Giá bán lại (VNĐ)
+            </label>
+
+            <input
+              id="resalePrice"
+              type="number"
+              min="1000"
+              step="1000"
+              placeholder="Ví dụ: 1200000"
+              required
+            >
+
+            <div class="notice">
+              Đây là hệ thống giao dịch mô phỏng
+              phục vụ bài tập nhóm. Không thực hiện
+              thanh toán hoặc chuyển nhượng vé thật.
+            </div>
+
+            <button
+              class="btn primary full"
+              type="submit"
+            >
+              Đăng bán vé
+            </button>
+
+          </form>
+        </section>
+
+        <!-- VÉ ĐANG BÁN -->
+        <section class="panel">
+          <h2>Vé đang được bán lại</h2>
+
+          <div id="resaleList">
+            <p class="muted">
+              Đang tải danh sách vé...
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
   </main>
 
-  <script src="resale.js"></script>
+  <footer>
+    © 2026 Ticketbox — Website mô phỏng
+    phục vụ đồ án nhóm 6.
+  </footer>
+
+  <script src="data.js?v=4"></script>
+  <script src="resale.js?v=2"></script>
+
 </body>
 </html>
