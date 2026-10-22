@@ -112,9 +112,9 @@
     const resale = document.createElement("button");
     resale.className = "button";
     resale.textContent = "Bán lại vé";
-    resale.addEventListener("click", () => {
-      alert("Chức năng bán lại vé sẽ được làm ở bước tiếp theo!");
-    });
+   resale.addEventListener("click", () => {
+  window.location.href = "resale.html";
+});
 
     actions.append(view, resale);
     bottom.append(summary, actions);
