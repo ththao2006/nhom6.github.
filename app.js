@@ -18,7 +18,18 @@ const isPublicEvent = e => {
 };
   let events = read("events", clone(window.TT_SEED_EVENTS));
   let artists = clone(window.TT_SEED_ARTISTS);
-  let user = read("user", null);
+ let user = (() => {
+  const oldUser = read("user", null);
+
+  if (
+    oldUser &&
+    ["organizer", "admin"].includes(oldUser.role)
+  ) {
+    return oldUser;
+  }
+
+  return null;
+})();
   let orders = read("orders", []);
   let tickets = read("tickets", []);
   let cart = read("cart", []);
