@@ -6,7 +6,7 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1">
 
-  <title>Tài khoản & xác minh | Ticketbox</title>
+  <title>Tài khoản & eKYC | Ticketbox</title>
 
   <style>
     * {
@@ -44,15 +44,15 @@
     }
 
     .container {
-      width: min(100% - 32px, 490px);
-      margin: 55px auto;
+      width: min(100% - 32px, 540px);
+      margin: 45px auto;
     }
 
     .card {
       background: #1d2029;
       border: 1px solid #343944;
       border-radius: 16px;
-      padding: 28px;
+      padding: 26px;
       margin-bottom: 20px;
     }
 
@@ -72,10 +72,12 @@
       line-height: 1.6;
     }
 
-    .tabs {
+    .tabs,
+    .actions,
+    .steps {
       display: flex;
       gap: 10px;
-      margin: 24px 0;
+      margin: 20px 0;
     }
 
     .tab {
@@ -105,7 +107,8 @@
       font-size: 14px;
     }
 
-    input {
+    input,
+    select {
       width: 100%;
       padding: 13px;
       background: #12141a;
@@ -115,9 +118,20 @@
       font-size: 15px;
     }
 
-    input:focus {
+    input:focus,
+    select:focus {
       outline: none;
       border-color: #27c477;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
     }
 
     button.primary {
@@ -129,7 +143,6 @@
       color: #101116;
       font-size: 15px;
       font-weight: 800;
-      cursor: pointer;
     }
 
     button.secondary {
@@ -139,7 +152,6 @@
       border: 1px solid #555b68;
       border-radius: 9px;
       color: white;
-      cursor: pointer;
       margin-top: 12px;
     }
 
@@ -153,7 +165,6 @@
       margin-top: 16px;
       font-size: 14px;
       line-height: 1.5;
-      background: #333039;
     }
 
     .message.success {
@@ -172,6 +183,7 @@
       background: #303440;
       margin: 18px 0;
       font-weight: bold;
+      line-height: 1.6;
     }
 
     .status.verified {
@@ -179,14 +191,104 @@
       background: rgba(39, 196, 119, .1);
     }
 
+    .step {
+      flex: 1;
+      padding: 10px 4px;
+      background: #303440;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 12px;
+      color: #b9c0cc;
+    }
+
+    .step.active {
+      background: #194f36;
+      color: #72efac;
+    }
+
+    .scan-box {
+      padding: 25px 18px;
+      background: #14251d;
+      border: 2px dashed #368a5b;
+      border-radius: 14px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .scan-icon {
+      font-size: 56px;
+    }
+
+    .camera-frame {
+      width: min(100%, 360px);
+      aspect-ratio: 3 / 4;
+      margin: 18px auto;
+      position: relative;
+      background: #080a0e;
+      border: 2px solid #27c477;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .camera-frame video,
+    .camera-frame canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .camera-frame video {
+      transform: scaleX(-1);
+    }
+
+    .camera-overlay {
+      position: absolute;
+      inset: 13% 15%;
+      border: 3px dashed rgba(39,196,119,.8);
+      border-radius: 48%;
+      pointer-events: none;
+    }
+
+    .camera-status {
+      background: #303440;
+      border-radius: 9px;
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 15px 0;
+    }
+
+    .actions button {
+      flex: 1;
+    }
+
     .warning {
       padding: 14px;
       border-left: 3px solid #f1c65c;
-      background: rgba(241, 198, 92, .08);
+      background: rgba(241,198,92,.08);
       font-size: 13px;
-      line-height: 1.6;
+      line-height: 1.7;
       color: #e8d8aa;
-      margin-top: 20px;
+      margin-bottom: 25px;
+    }
+
+    .continue-link {
+      display: inline-block;
+      color: #27c477;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 420px) {
+      .card {
+        padding: 18px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
@@ -198,24 +300,26 @@
   </header>
 
   <main class="container">
+
+    <!-- ĐĂNG NHẬP / ĐĂNG KÝ -->
     <section id="guestView" class="card">
       <h1>Tài khoản của bạn</h1>
 
       <p class="muted">
-        Đăng ký tài khoản để trải nghiệm hệ thống
-        xác minh danh tính và chống đầu cơ vé.
+        Đăng nhập hoặc đăng ký để trải nghiệm
+        hệ thống eKYC chống đầu cơ vé.
       </p>
 
       <div class="tabs">
-        <button class="tab active"
-                type="button"
-                id="loginTab">
+        <button id="loginTab"
+                class="tab active"
+                type="button">
           Đăng nhập
         </button>
 
-        <button class="tab"
-                type="button"
-                id="registerTab">
+        <button id="registerTab"
+                class="tab"
+                type="button">
           Đăng ký
         </button>
       </div>
@@ -225,12 +329,13 @@
           <label for="loginEmail">Email</label>
           <input id="loginEmail"
                  type="email"
-                 autocomplete="off"
                  required>
         </div>
 
         <div class="field">
-          <label for="loginPassword">Mật khẩu demo</label>
+          <label for="loginPassword">
+            Mật khẩu demo
+          </label>
           <input id="loginPassword"
                  type="password"
                  required>
@@ -251,7 +356,6 @@
           <label for="registerEmail">Email</label>
           <input id="registerEmail"
                  type="email"
-                 autocomplete="off"
                  required>
         </div>
 
@@ -275,45 +379,171 @@
            role="status"></div>
     </section>
 
+    <!-- TÀI KHOẢN -->
     <section id="accountView" class="card hidden">
       <h1>Hồ sơ tài khoản</h1>
 
-      <p class="muted" id="accountName"></p>
-      <p class="muted" id="accountEmail"></p>
+      <p id="accountName" class="muted"></p>
+      <p id="accountEmail" class="muted"></p>
 
       <div id="verificationStatus"
            class="status"></div>
 
-      <div id="verificationFormArea">
-        <h2>Xác minh danh tính (DEMO)</h2>
-
+      <div id="verifiedArea" class="hidden">
         <p class="muted">
-          Hệ thống sử dụng mã danh tính giả lập
-          thay vì giấy tờ tùy thân thật.
+          Bạn đã hoàn thành xác minh danh tính
+          và có thể tiếp tục đặt vé.
         </p>
 
-        <form id="verifyForm">
-          <div class="field">
-            <label for="identityCode">
-              Mã danh tính giả lập
-            </label>
-            <input
-              id="identityCode"
-              placeholder="DEMO-USER001"
-              autocomplete="off"
-              required>
+        <a id="continueLink"
+           class="continue-link"
+           href="index.html">
+          → Tiếp tục mua vé
+        </a>
+      </div>
+
+      <!-- E KYC -->
+      <div id="ekycArea">
+        <h2>Xác minh eKYC (DEMO)</h2>
+
+        <p class="muted">
+          Mô phỏng quét giấy tờ, chụp khuôn mặt
+          bằng camera thật và kiểm tra trùng danh tính.
+        </p>
+
+        <div class="steps">
+          <div id="indicator1" class="step active">
+            1. Giấy tờ
           </div>
 
-          <button class="primary" type="submit">
-            Xác minh danh tính
-          </button>
-        </form>
+          <div id="indicator2" class="step">
+            2. Khuôn mặt
+          </div>
 
-        <p class="muted">
-          Ví dụ: DEMO-USER001, DEMO-USER002.
-          Hai tài khoản không thể dùng cùng
-          một mã danh tính demo.
-        </p>
+          <div id="indicator3" class="step">
+            3. Kết quả
+          </div>
+        </div>
+
+        <!-- BƯỚC 1 -->
+        <div id="ekycStep1">
+          <div class="scan-box">
+            <div class="scan-icon">🪪</div>
+            <h3>Quét giấy tờ (DEMO)</h3>
+            <p class="muted">
+              Chọn hồ sơ giấy tờ giả lập.
+              Không sử dụng CCCD thật.
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="profileSelect">
+              Chọn hồ sơ mẫu
+            </label>
+            <select id="profileSelect"></select>
+          </div>
+
+          <div id="profileDetails"
+               class="status"></div>
+
+          <button id="scanDocument"
+                  class="primary"
+                  type="button">
+            Quét giấy tờ →
+          </button>
+        </div>
+
+        <!-- BƯỚC 2 -->
+        <div id="ekycStep2" class="hidden">
+          <h3>Chụp khuôn mặt bằng camera</h3>
+
+          <p class="muted">
+            Bật camera và đưa mặt vào khung.
+            Ảnh chỉ dùng để minh họa,
+            không được lưu hoặc tải lên.
+          </p>
+
+          <div class="camera-frame">
+            <video id="faceVideo"
+                   autoplay
+                   muted
+                   playsinline></video>
+
+            <canvas id="faceCanvas"
+                    class="hidden"></canvas>
+
+            <div id="faceOverlay"
+                 class="camera-overlay"></div>
+          </div>
+
+          <p id="cameraStatus"
+             class="camera-status">
+            Camera chưa được bật.
+          </p>
+
+          <div class="actions">
+            <button id="startCamera"
+                    class="primary"
+                    type="button">
+              📷 Bật camera
+            </button>
+
+            <button id="captureFace"
+                    class="primary"
+                    type="button"
+                    disabled>
+              Chụp ảnh
+            </button>
+          </div>
+
+          <div class="actions">
+            <button id="retakeFace"
+                    class="secondary"
+                    type="button"
+                    disabled>
+              Chụp lại
+            </button>
+
+            <button id="confirmFace"
+                    class="primary"
+                    type="button"
+                    disabled>
+              Xác nhận ảnh →
+            </button>
+          </div>
+
+          <button id="backToDocument"
+                  class="secondary"
+                  type="button">
+            ← Quay lại giấy tờ
+          </button>
+        </div>
+
+        <!-- BƯỚC 3 -->
+        <div id="ekycStep3" class="hidden">
+          <div class="scan-box">
+            <div class="scan-icon">🛡️</div>
+            <h3>Đối chiếu danh tính</h3>
+
+            <p class="muted">
+              Đã hoàn tất chụp ảnh minh họa.
+              Tiếp tục kiểm tra hồ sơ có bị
+              sử dụng bởi tài khoản khác không.
+            </p>
+          </div>
+
+          <button id="finishVerification"
+                  class="primary"
+                  type="button">
+            Hoàn tất xác minh (DEMO)
+          </button>
+
+          <button id="restartVerification"
+                  class="secondary"
+                  type="button">
+            ← Chọn hồ sơ khác
+          </button>
+        </div>
       </div>
 
       <div id="accountMessage"
@@ -328,21 +558,33 @@
     </section>
 
     <div class="warning">
-      ⚠️ Đây là eKYC giả lập dành cho đồ án.
-      Không nhập CCCD, mật khẩu thật hoặc dữ liệu
-      cá nhân nhạy cảm. Tài khoản và trạng thái
-      xác minh chỉ lưu trên trình duyệt hiện tại,
-      không có máy chủ xác thực.
+      ⚠️ Đây là eKYC giả lập phục vụ đồ án.
+      Camera hoạt động thật nhưng không có
+      nhận diện khuôn mặt, kiểm tra người thật
+      hay đối chiếu sinh trắc học.
+      Không nhập CCCD hoặc mật khẩu thật.
+      Tài khoản và trạng thái xác minh chỉ
+      lưu trong trình duyệt.
     </div>
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth.js?v=2"></script>
 
   <script>
+    "use strict";
+
     const $ = id => document.getElementById(id);
 
-    function showMessage(target, message, success = false) {
-      const el = $(target);
+    let selectedProfileId = "";
+    let cameraStream = null;
+    let faceCaptured = false;
+    let cameraRequestId = 0;
+
+    const faceVideo = $("faceVideo");
+    const faceCanvas = $("faceCanvas");
+
+    function showMessage(id, message, success = false) {
+      const el = $(id);
       el.textContent = message;
       el.className = "message " +
         (success ? "success" : "error");
@@ -350,21 +592,297 @@
 
     function clearMessages() {
       ["guestMessage", "accountMessage"].forEach(id => {
-        $(id).className = "message hidden";
         $(id).textContent = "";
+        $(id).className = "message hidden";
       });
     }
 
     function showTab(tab) {
       clearMessages();
 
-      const login = tab === "login";
+      const isLogin = tab === "login";
 
-      $("loginForm").classList.toggle("hidden", !login);
-      $("registerForm").classList.toggle("hidden", login);
+      $("loginForm").classList.toggle(
+        "hidden", !isLogin
+      );
 
-      $("loginTab").classList.toggle("active", login);
-      $("registerTab").classList.toggle("active", !login);
+      $("registerForm").classList.toggle(
+        "hidden", isLogin
+      );
+
+      $("loginTab").classList.toggle(
+        "active", isLogin
+      );
+
+      $("registerTab").classList.toggle(
+        "active", !isLogin
+      );
+    }
+
+    function stopCamera() {
+      cameraRequestId++;
+
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(
+          track => track.stop()
+        );
+
+        cameraStream = null;
+      }
+
+      faceVideo.pause();
+      faceVideo.srcObject = null;
+
+      $("captureFace").disabled = true;
+      $("startCamera").disabled = false;
+    }
+
+    function resetFace() {
+      stopCamera();
+
+      faceCaptured = false;
+
+      $("confirmFace").disabled = true;
+      $("retakeFace").disabled = true;
+
+      faceVideo.classList.remove("hidden");
+      faceCanvas.classList.add("hidden");
+      $("faceOverlay").classList.remove("hidden");
+
+      const context = faceCanvas.getContext("2d");
+
+      if (context) {
+        context.clearRect(
+          0, 0,
+          faceCanvas.width,
+          faceCanvas.height
+        );
+      }
+
+      // Giải phóng dữ liệu ảnh trong canvas.
+      faceCanvas.width = 0;
+      faceCanvas.height = 0;
+
+      $("cameraStatus").textContent =
+        "Camera chưa được bật.";
+    }
+
+    function setStep(step) {
+      clearMessages();
+
+      for (let i = 1; i <= 3; i++) {
+        $("ekycStep" + i).classList.toggle(
+          "hidden", i !== step
+        );
+
+        $("indicator" + i).classList.toggle(
+          "active", i <= step
+        );
+      }
+    }
+
+    function populateProfiles() {
+      const select = $("profileSelect");
+      select.replaceChildren();
+
+      TT_AUTH.getProfiles().forEach(profile => {
+        const option = document.createElement("option");
+
+        option.value = profile.id;
+        option.textContent = profile.name;
+
+        select.appendChild(option);
+      });
+
+      updateProfileDetails();
+    }
+
+    function updateProfileDetails() {
+      const profile = TT_AUTH.getProfiles().find(
+        item => item.id === $("profileSelect").value
+      );
+
+      selectedProfileId = profile?.id || "";
+
+      $("profileDetails").textContent = profile
+        ? "Họ tên mẫu: " + profile.name +
+          "\nNăm sinh: " + profile.birthYear +
+          "\nGiấy tờ: " + profile.document
+        : "Không có hồ sơ mẫu.";
+
+      $("profileDetails").style.whiteSpace =
+        "pre-line";
+    }
+
+    function getReturnUrl() {
+      const value = new URLSearchParams(
+        location.search
+      ).get("return");
+
+      if (!value) return "index.html";
+
+      // Chỉ chấp nhận URL nội bộ cùng thư mục.
+      if (
+        value.startsWith("/") ||
+        value.startsWith("\\") ||
+        value.includes("\\") ||
+        value.includes(":") ||
+        value.startsWith("//")
+      ) {
+        return "index.html";
+      }
+
+      try {
+        const target = new URL(value, location.href);
+
+        if (
+          target.origin !== location.origin ||
+          !target.pathname.startsWith(
+            location.pathname.substring(
+              0,
+              location.pathname.lastIndexOf("/") + 1
+            )
+          )
+        ) {
+          return "index.html";
+        }
+
+        return target.href;
+      } catch {
+        return "index.html";
+      }
+    }
+
+    function render() {
+      resetFace();
+      clearMessages();
+
+      const user = TT_AUTH.getCurrentUser();
+
+      $("guestView").classList.toggle(
+        "hidden", Boolean(user)
+      );
+
+      $("accountView").classList.toggle(
+        "hidden", !user
+      );
+
+      if (!user) return;
+
+      $("accountName").textContent =
+        "Họ tên: " + user.name;
+
+      $("accountEmail").textContent =
+        "Email: " + user.email;
+
+      $("verificationStatus").textContent =
+        user.verified
+          ? "✓ Đã xác minh eKYC (DEMO)\n" +
+            "Mã danh tính: " +
+            (user.verifiedIdentityId || "")
+          : "⚠ Chưa xác minh danh tính";
+
+      $("verificationStatus").style.whiteSpace =
+        "pre-line";
+
+      $("verificationStatus").classList.toggle(
+        "verified", Boolean(user.verified)
+      );
+
+      $("verifiedArea").classList.toggle(
+        "hidden", !user.verified
+      );
+
+      $("ekycArea").classList.toggle(
+        "hidden", Boolean(user.verified)
+      );
+
+      $("continueLink").href = getReturnUrl();
+
+      if (!user.verified) {
+        populateProfiles();
+        setStep(1);
+      }
+    }
+
+    async function startCamera() {
+      resetFace();
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        $("cameraStatus").textContent =
+          "Trình duyệt không hỗ trợ camera " +
+          "hoặc website không chạy qua HTTPS.";
+        return;
+      }
+
+      const requestId = ++cameraRequestId;
+
+      $("startCamera").disabled = true;
+      $("cameraStatus").textContent =
+        "Đang yêu cầu quyền camera...";
+
+      try {
+        const stream =
+          await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: {
+              facingMode: "user",
+              width: { ideal: 640 },
+              height: { ideal: 480 }
+            }
+          });
+
+        // Nếu đã rời bước camera trong lúc chờ quyền,
+        // không được bật camera trở lại.
+        if (
+          requestId !== cameraRequestId ||
+          $("ekycStep2").classList.contains("hidden")
+        ) {
+          stream.getTracks().forEach(
+            track => track.stop()
+          );
+          return;
+        }
+
+        cameraStream = stream;
+        faceVideo.srcObject = stream;
+
+        await faceVideo.play();
+
+        if (requestId !== cameraRequestId) {
+          stream.getTracks().forEach(
+            track => track.stop()
+          );
+          return;
+        }
+
+        $("captureFace").disabled = false;
+        $("cameraStatus").textContent =
+          "✓ Camera đã bật. Đưa mặt vào khung " +
+          "và bấm Chụp ảnh.";
+      } catch (error) {
+        let message = "Không thể bật camera.";
+
+        if (error.name === "NotAllowedError") {
+          message =
+            "Bạn đã từ chối quyền camera. " +
+            "Hãy cho phép camera trong trình duyệt.";
+        } else if (error.name === "NotFoundError") {
+          message = "Không tìm thấy camera.";
+        } else if (error.name === "NotReadableError") {
+          message =
+            "Camera đang được ứng dụng khác sử dụng.";
+        }
+
+        if (requestId === cameraRequestId) {
+          $("cameraStatus").textContent = message;
+          stopCamera();
+        }
+      } finally {
+        if (requestId === cameraRequestId) {
+          $("startCamera").disabled = false;
+        }
+      }
     }
 
     $("loginTab").addEventListener("click", () => {
@@ -375,95 +893,184 @@
       showTab("register");
     });
 
-    function render() {
-      clearMessages();
+    $("registerForm").addEventListener(
+      "submit", event => {
+        event.preventDefault();
 
-      const user = TT_AUTH.getCurrentUser();
+        try {
+          TT_AUTH.register({
+            name: $("registerName").value,
+            email: $("registerEmail").value,
+            password: $("registerPassword").value
+          });
 
-      $("guestView").classList.toggle("hidden", !!user);
-      $("accountView").classList.toggle("hidden", !user);
-
-      if (!user) return;
-
-      $("accountName").textContent =
-        "Họ tên: " + user.name;
-
-      $("accountEmail").textContent =
-        "Email: " + user.email;
-
-      $("verificationStatus").textContent = user.verified
-        ? "✓ Đã xác minh danh tính (DEMO)"
-        : "⚠ Chưa xác minh danh tính";
-
-      $("verificationStatus").classList.toggle(
-        "verified",
-        user.verified
-      );
-
-      $("verificationFormArea").classList.toggle(
-        "hidden",
-        user.verified
-      );
-    }
-
-    $("registerForm").addEventListener("submit", e => {
-      e.preventDefault();
-
-      try {
-        TT_AUTH.register({
-          name: $("registerName").value,
-          email: $("registerEmail").value,
-          password: $("registerPassword").value
-        });
-
-        $("registerForm").reset();
-        render();
-      } catch (error) {
-        showMessage("guestMessage", error.message);
+          $("registerForm").reset();
+          render();
+        } catch (error) {
+          showMessage(
+            "guestMessage", error.message
+          );
+        }
       }
-    });
+    );
 
-    $("loginForm").addEventListener("submit", e => {
-      e.preventDefault();
+    $("loginForm").addEventListener(
+      "submit", event => {
+        event.preventDefault();
 
-      try {
-        TT_AUTH.login(
-          $("loginEmail").value,
-          $("loginPassword").value
+        try {
+          TT_AUTH.login(
+            $("loginEmail").value,
+            $("loginPassword").value
+          );
+
+          $("loginForm").reset();
+          render();
+        } catch (error) {
+          showMessage(
+            "guestMessage", error.message
+          );
+        }
+      }
+    );
+
+    $("profileSelect").addEventListener(
+      "change", updateProfileDetails
+    );
+
+    $("scanDocument").addEventListener(
+      "click", () => {
+        updateProfileDetails();
+
+        if (!selectedProfileId) {
+          showMessage(
+            "accountMessage",
+            "Vui lòng chọn hồ sơ mẫu."
+          );
+          return;
+        }
+
+        setStep(2);
+      }
+    );
+
+    $("startCamera").addEventListener(
+      "click", startCamera
+    );
+
+    $("captureFace").addEventListener(
+      "click", () => {
+        if (
+          !cameraStream ||
+          !faceVideo.videoWidth ||
+          !faceVideo.videoHeight
+        ) {
+          $("cameraStatus").textContent =
+            "Camera chưa sẵn sàng.";
+          return;
+        }
+
+        const width = faceVideo.videoWidth;
+        const height = faceVideo.videoHeight;
+
+        faceCanvas.width = width;
+        faceCanvas.height = height;
+
+        const context = faceCanvas.getContext("2d");
+
+        context.translate(width, 0);
+        context.scale(-1, 1);
+
+        context.drawImage(
+          faceVideo, 0, 0, width, height
         );
 
-        $("loginForm").reset();
-        render();
-      } catch (error) {
-        showMessage("guestMessage", error.message);
+        context.setTransform(1, 0, 0, 1, 0, 0);
+
+        faceCaptured = true;
+        stopCamera();
+
+        faceVideo.classList.add("hidden");
+        faceCanvas.classList.remove("hidden");
+        $("faceOverlay").classList.add("hidden");
+
+        $("confirmFace").disabled = false;
+        $("retakeFace").disabled = false;
+
+        $("cameraStatus").textContent =
+          "✓ Đã chụp ảnh. Kiểm tra ảnh " +
+          "và bấm Xác nhận ảnh.";
       }
-    });
+    );
 
-    $("verifyForm").addEventListener("submit", e => {
-      e.preventDefault();
+    $("retakeFace").addEventListener(
+      "click", startCamera
+    );
 
-      try {
-        TT_AUTH.verifyIdentity(
-          $("identityCode").value
-        );
+    $("confirmFace").addEventListener(
+      "click", () => {
+        if (!faceCaptured) return;
 
-        $("verifyForm").reset();
-        render();
-
-        showMessage(
-          "accountMessage",
-          "Xác minh danh tính demo thành công!",
-          true
-        );
-      } catch (error) {
-        showMessage("accountMessage", error.message);
+        resetFace();
+        setStep(3);
       }
-    });
+    );
 
-    $("logoutButton").addEventListener("click", () => {
-      TT_AUTH.logout();
-      render();
-    });
+    $("backToDocument").addEventListener(
+      "click", () => {
+        resetFace();
+        setStep(1);
+      }
+    );
+
+    $("restartVerification").addEventListener(
+      "click", () => {
+        resetFace();
+        setStep(1);
+      }
+    );
+
+    $("finishVerification").addEventListener(
+      "click", () => {
+        try {
+          TT_AUTH.verifyProfile(selectedProfileId);
+
+          render();
+
+          showMessage(
+            "accountMessage",
+            "✓ eKYC giả lập thành công! " +
+            "Hệ thống đã cấp mã danh tính.",
+            true
+          );
+        } catch (error) {
+          showMessage(
+            "accountMessage",
+            error.message
+          );
+        }
+      }
+    );
+
+    $("logoutButton").addEventListener(
+      "click", () => {
+        resetFace();
+        TT_AUTH.logout();
+        render();
+      }
+    );
+
+    window.addEventListener(
+      "pagehide", resetFace
+    );
+
+    document.addEventListener(
+      "visibilitychange", () => {
+        if (document.hidden) {
+          stopCamera();
+        }
+      }
+    );
 
     render();
   </script>
