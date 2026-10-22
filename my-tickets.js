@@ -24,9 +24,39 @@
   }
 
   // Chỉ hiện đơn hàng demo đã thanh toán
-  const paidOrders = orders
-    .filter(order => order.status === "paid")
-    .reverse();
+const currentUser =
+  window.TT_AUTH?.getCurrentUser?.() || null;
+
+if (
+  !currentUser ||
+  !currentUser.verified ||
+  !currentUser.verifiedIdentityId
+) {
+  list.innerHTML = `
+    <div class="empty">
+      <h2>Vui lòng đăng nhập và xác minh eKYC</h2>
+      <p class="muted">
+        Bạn cần xác minh danh tính để xem vé của mình.
+      </p>
+      <a
+        href="auth.html?return=my-tickets.html"
+        class="button primary"
+      >
+        Đăng nhập / Xác minh eKYC
+      </a>
+    </div>
+  `;
+  return;
+}
+
+const paidOrders = orders
+  .filter(order =>
+    order.status === "paid" &&
+    order.buyer?.userId === currentUser.id &&
+    order.buyer?.verifiedIdentityId ===
+      currentUser.verifiedIdentityId
+  )
+  .reverse();
 
   if (paidOrders.length === 0) {
     list.innerHTML = `
