@@ -21,12 +21,108 @@
   const eventCard = ev => `<article class="event-card" data-open-event="${ev.id}" tabindex="0" role="button" aria-label="Xem ${ev.title}">
     <div class="event-poster" style="background-image:url('${ev.image}')"><span class="event-tag">${ev.free||ev.price===0?"FREE ENTRY":ev.genre}</span><button class="event-heart" data-fav="${ev.id}" aria-label="Lưu sự kiện">♡</button></div>
     <div class="event-card-body"><div class="event-date">${dateText(ev.date)} · ${ev.time||"19:00"}</div><h3>${ev.title}</h3><div class="event-location">⌖ ${ev.location} · ${ev.venue}</div><div class="event-card-bottom"><div class="event-price">${money(ev.price)}<small>${ev.free||ev.price===0?"Không mất phí":"Giá vé từ"}</small></div><span class="card-arrow">↗</span></div></div></article>`;
-  function renderEvents() {
-    const q=($("#searchInput")?.value||"").trim().toLowerCase(), genre=$("#genreFilter")?.value||"", loc=$("#locationFilter")?.value||"", price=$("#priceFilter")?.value||"";
-    const list=events.filter(e=>(!q || `${e.title} ${e.location} ${e.venue} ${e.genre} ${e.organizer}`.toLowerCase().includes(q))&&(!genre||e.genre===genre)&&(!loc||e.location===loc)&&(!price||(price==="free"?(e.free||e.price===0):(!e.free&&e.price>0)))&&(!activeCategory||e.genre===activeCategory)&&eventStatus(e)!=="draft");
-    $("#eventGrid").innerHTML=list.map(eventCard).join("");
-    $("#emptyEvents").classList.toggle("hidden",list.length>0);
+ 
+function renderEvents() {
+  const q = ($("#searchInput")?.value || "").trim().toLowerCase();
+  const genre = $("#genreFilter")?.value || "";
+  const loc = $("#locationFilter")?.value || "";
+  const price = $("#priceFilter")?.value || "";
+  const time = $("#timeFilter")?.value || "";
+
+  // Lấy ngày hiện tại theo giờ địa phương
+  const now = new Date();
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+
+  // Kiểm tra thời gian diễn ra sự kiện
+  function matchesTime(e) {
+    if (!time) return true;
+
+    const eventDate = new Date(e.date + "T12:00:00");
+    const eventDay = new Date(
+      eventDate.getFullYear(),
+      eventDate.getMonth(),
+      eventDate.getDate()
+    );
+
+    const diff = Math.round((eventDay - today) / 86400000);
+
+    if (time === "today") return diff === 0;
+
+    if (time === "tomorrow") return diff === 1;
+
+    if (time === "7days") {
+      return diff >= 0 && diff <= 7;
+    }
+
+    if (time === "30days") {
+      return diff >= 0 && diff <= 30;
+    }
+
+    if (time === "weekend") {
+      const saturdayOffset = (6 - today.getDay() + 7) % 7;
+
+      const saturday = new Date(today);
+      saturday.setDate(today.getDate() + saturdayOffset);
+
+      const sunday = new Date(saturday);
+      sunday.setDate(saturday.getDate() + 1);
+
+      return eventDay >= saturday && eventDay <= sunday;
+    }
+
+    return true;
   }
+
+  // Lọc danh sách sự kiện
+  const list = events.filter(e => {
+    const searchText = [
+      e.title,
+      e.location,
+      e.venue,
+      e.genre,
+      e.organizer
+    ].join(" ").toLowerCase();
+
+    const matchesSearch = !q || searchText.includes(q);
+
+    const matchesGenre = !genre || e.genre === genre;
+
+    const matchesLocation = !loc || e.location === loc;
+
+    const matchesPrice = !price ||
+      (price === "free"
+        ? e.free || e.price === 0
+        : !e.free && e.price > 0);
+
+    const matchesCategory =
+      !activeCategory || e.genre === activeCategory;
+
+    return (
+      matchesSearch &&
+      matchesGenre &&
+      matchesLocation &&
+      matchesPrice &&
+      matchesTime(e) &&
+      matchesCategory &&
+      eventStatus(e) !== "draft" &&
+      e.status !== "hidden"
+    );
+  });
+
+  // Hiển thị danh sách sự kiện
+  $("#eventGrid").innerHTML = list.map(eventCard).join("");
+
+  // Hiển thị thông báo nếu không tìm thấy sự kiện
+  $("#emptyEvents").classList.toggle(
+    "hidden",
+    list.length > 0
+  );
+}
+
   function renderArtists() {
     $("#artistGrid").innerHTML=artists.map(a=>`<article class="artist-card" tabindex="0" data-artist="${a.id}" style="background-image:url('${a.image}')"><div class="artist-info"><h3>${a.name}</h3><p>${a.role}</p><span>XEM HỒ SƠ ↗</span></div></article>`).join("");
   }
@@ -110,8 +206,39 @@
   }
   $("#filterForm").addEventListener("submit",ev=>{ev.preventDefault();renderEvents();location.hash="#events";});
   $("#searchInput").addEventListener("input",renderEvents);$("#genreFilter").addEventListener("change",renderEvents);$("#locationFilter").addEventListener("change",renderEvents);$("#priceFilter").addEventListener("change",renderEvents);
-  $("#categoryRow").addEventListener("click",ev=>{const b=ev.target.closest("[data-category]");if(!b)return;activeCategory=b.dataset.category;$$(".category-chip").forEach(x=>x.classList.toggle("active",x===b));renderEvents();});
-  $("#resetFilters").onclick=()=>{$("#searchInput").value="";$("#genreFilter").value="";$("#locationFilter").value="";$("#priceFilter").value="";activeCategory="";$$(".category-chip").forEach(x=>x.classList.toggle("active",!x.dataset.category));renderEvents();};
+  
+["genreFilter", "locationFilter", "priceFilter", "timeFilter"]
+  .forEach(id => {
+    $("#" + id).addEventListener("change", () => {
+      activeCategory = "";
+      renderEvents();
+    });
+  });
+
+function resetEventFilters() {
+  ["genreFilter", "locationFilter", "priceFilter", "timeFilter"]
+    .forEach(id => {
+      $("#" + id).value = "";
+    });
+
+  $("#searchInput").value = "";
+
+  if ($("#headerSearchInput")) {
+    $("#headerSearchInput").value = "";
+  }
+
+  activeCategory = "";
+  renderEvents();
+}
+
+$("#resetFilters").onclick = resetEventFilters;
+
+$("#emptyEvents").addEventListener("click", ev => {
+  if (ev.target.closest("[data-reset-filters]")) {
+    resetEventFilters();
+  }
+});
+
   $("#eventGrid").addEventListener("click",ev=>{const fav=ev.target.closest("[data-fav]");if(fav){ev.stopPropagation();let f=read("favorites",[]);f=f.includes(fav.dataset.fav)?f.filter(x=>x!==fav.dataset.fav):[...f,fav.dataset.fav];write("favorites",f);fav.textContent=f.includes(fav.dataset.fav)?"♥":"♡";toast(f.includes(fav.dataset.fav)?"Đã lưu sự kiện":"Đã bỏ lưu sự kiện");return;}const card=ev.target.closest("[data-open-event]");if(card)openEvent(card.dataset.openEvent);});
   $("#artistGrid").addEventListener("click",ev=>{const a=ev.target.closest("[data-artist]");if(a)openArtist(a.dataset.artist);});
   $("#modalContent").addEventListener("click",handleModalClick);
