@@ -578,6 +578,46 @@
   timerInterval = setInterval(updateTimer, 1000);
   updateTimer();
 
+  function validateResaleOwnership(listing) {
+    if (!isResale) return null;
+
+    if (!window.TT_TICKETS) {
+      return "Chưa tải hệ thống quản lý vé.";
+    }
+
+    if (!listing?.unitKey) {
+      return "Tin đăng cũ chưa có mã vé riêng. Vui lòng đăng lại vé.";
+    }
+
+    const ticket = window.TT_TICKETS.getAll().find(
+      item => item.unitKey === listing.unitKey
+    );
+
+    if (!ticket) {
+      return "Không tìm thấy vé gốc. Vui lòng kiểm tra lại tin đăng.";
+    }
+
+    if (ticket.status !== "valid") {
+      return "Vé đã sử dụng hoặc không còn hợp lệ.";
+    }
+
+    if (
+      ticket.ownerUserId !== listing.ownerUserId ||
+      ticket.ownerIdentityId !== listing.ownerIdentityId
+    ) {
+      return "Người đăng bán không còn sở hữu vé.";
+    }
+
+    if (
+      ticket.ownerUserId === currentUser.id ||
+      ticket.ownerIdentityId === identityId
+    ) {
+      return "Bạn không thể mua lại vé của chính mình.";
+    }
+
+    return null;
+  }
+
   // 11. Kiểm tra trước khi thanh toán
   function validateBeforePayment() {
     if (!activeIdentityIsValid()) {
@@ -596,6 +636,8 @@
 
     if (isResale) {
       const listing = getResaleListing();
+      const ownershipError = validateResaleOwnership(listing);
+if (ownershipError) return ownershipError;
 
       if (
         !validResaleListing(listing) ||
@@ -818,36 +860,152 @@
         createdAt: new Date().toISOString()
       };
 
+     
       try {
-        const orders = readArray("tt_orders");
-        orders.push(order);
+        const ticketCore = window.TT_TICKETS;
 
-        localStorage.setItem(
-          "tt_orders",
-          JSON.stringify(orders)
-        );
+        if (!ticketCore) {
+          throw new Error("Chưa tải ticket-core.js");
+        }
+
+        const oldOrdersRaw =
+          localStorage.getItem("tt_orders");
+
+        const oldListingsRaw =
+          localStorage.getItem("tt_resales");
+
+        const oldTicketsRaw =
+          localStorage.getItem("tt_ticket_units");
+
+        const orders = readArray("tt_orders");
+
+        if (orders.some(item => item.id === order.id)) {
+          throw new Error("Đơn hàng đã tồn tại.");
+        }
 
         if (isResale) {
-          currentListing.status = "sold";
-          currentListing.soldAt =
-            new Date().toISOString();
+          const ownershipError =
+            validateResaleOwnership(currentListing);
 
-          currentListing.buyerOrderId = order.id;
+          if (ownershipError) {
+            throw new Error(ownershipError);
+          }
 
-          listings = listings.map(item =>
-            normalizeId(item.id) === normalizeId(resaleId)
-              ? currentListing
-              : item
+          // Chuẩn bị trạng thái tin đăng đã bán.
+          const updatedListings = listings.map(item => {
+            if (normalizeId(item.id) !== normalizeId(resaleId)) {
+              return item;
+            }
+
+            return {
+              ...item,
+              status: "sold",
+              soldAt: new Date().toISOString(),
+              buyerOrderId: order.id,
+              buyerUserId: currentUser.id,
+              buyerIdentityId: identityId
+            };
+          });
+
+          // Chuyển quyền sở hữu và thay mã QR.
+          const transferResult = ticketCore.transfer(
+            currentListing,
+            {
+              userId: currentUser.id,
+              verifiedIdentityId: identityId
+            },
+            order.id
           );
 
-          localStorage.setItem(
-            "tt_resales",
-            JSON.stringify(listings)
-          );
+          if (!transferResult.ok) {
+            throw new Error(transferResult.message);
+          }
+
+          try {
+            localStorage.setItem(
+              "tt_resales",
+              JSON.stringify(updatedListings)
+            );
+
+            orders.push(order);
+
+            localStorage.setItem(
+              "tt_orders",
+              JSON.stringify(orders)
+            );
+          } catch (saveError) {
+            // Khôi phục dữ liệu nếu một bước lưu bị lỗi.
+            try {
+              if (oldTicketsRaw === null) {
+                localStorage.removeItem("tt_ticket_units");
+              } else {
+                localStorage.setItem(
+                  "tt_ticket_units",
+                  oldTicketsRaw
+                );
+              }
+
+              if (oldListingsRaw === null) {
+                localStorage.removeItem("tt_resales");
+              } else {
+                localStorage.setItem(
+                  "tt_resales",
+                  oldListingsRaw
+                );
+              }
+
+              if (oldOrdersRaw === null) {
+                localStorage.removeItem("tt_orders");
+              } else {
+                localStorage.setItem(
+                  "tt_orders",
+                  oldOrdersRaw
+                );
+              }
+            } catch (rollbackError) {
+              console.error(
+                "Không thể khôi phục dữ liệu:",
+                rollbackError
+              );
+            }
+
+            throw saveError;
+          }
+
+        } else {
+          // Mua vé gốc.
+          // Tạo từng chiếc vé riêng biệt.
+          ticketCore.createFromOrder(order);
+
+          try {
+            orders.push(order);
+
+            localStorage.setItem(
+              "tt_orders",
+              JSON.stringify(orders)
+            );
+          } catch (saveError) {
+            try {
+              if (oldTicketsRaw === null) {
+                localStorage.removeItem("tt_ticket_units");
+              } else {
+                localStorage.setItem(
+                  "tt_ticket_units",
+                  oldTicketsRaw
+                );
+              }
+            } catch (rollbackError) {
+              console.error(rollbackError);
+            }
+
+            throw saveError;
+          }
         }
-      } catch {
+
+      } catch (error) {
         showConfirmError(
-          "Không thể lưu đơn hàng demo."
+          error.message ||
+          "Không thể lưu giao dịch demo."
         );
         return;
       }
