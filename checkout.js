@@ -84,7 +84,7 @@
             </div>
 
             <button type="submit" class="button" id="payButton">
-              Xác nhận thanh toán demo
+              Tiếp tục thanh toán →
             </button>
           </form>
         </section>
@@ -256,46 +256,27 @@
         (sum, t) => sum + t.price * t.quantity, 0
       );
 
-      const order = {
-        id: "ORD-" + Date.now(),
+      
+      const draft = {
         eventId: event.id,
         eventTitle: event.title,
         buyer,
         items,
         total,
-        status: "paid",
-        demo: true,
         createdAt: new Date().toISOString()
       };
 
-      let orders = [];
-
       try {
-        const saved = JSON.parse(localStorage.getItem("tt_orders"));
-        if (Array.isArray(saved)) orders = saved;
-      } catch {}
-
-      orders.push(order);
-      try {
-        localStorage.setItem("tt_orders", JSON.stringify(orders));
+        sessionStorage.setItem(
+          "tt_payment_draft",
+          JSON.stringify(draft)
+        );
       } catch (error) {
-        alert("Không thể lưu đơn hàng trên trình duyệt này.");
+        alert("Không thể chuyển thông tin đặt vé.");
         return;
       }
 
-      root.innerHTML = `
-        <div class="box success">
-          <h2>✓ Đặt vé demo thành công!</h2>
-          <p>Mã đơn hàng: <strong id="orderCode"></strong></p>
-          <p>Tổng thanh toán: <strong id="paidTotal"></strong></p>
-          <p class="muted">
-            Đây là đơn hàng mô phỏng, không có giao dịch tiền thật.
-          </p>
-          <a href="index.html">← Quay về trang chủ</a>
-        </div>
-      `;
-
-      document.getElementById("orderCode").textContent = order.id;
-      document.getElementById("paidTotal").textContent = money(total);
+      window.location.href =
+        "payment.html?id=" + encodeURIComponent(event.id);
     });
 })();
