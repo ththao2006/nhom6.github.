@@ -116,6 +116,70 @@
 
   document.getElementById("eventName").textContent = event.title;
 
+  // Tạo sơ đồ khu vực vé từ dữ liệu sự kiện
+  const map = document.createElement("div");
+  map.className = "seatmap";
+
+  const stage = document.createElement("div");
+  stage.className = "stage";
+  stage.textContent = "SÂN KHẤU";
+
+  const zoneGrid = document.createElement("div");
+  zoneGrid.className = "zone-grid";
+
+  const hint = document.createElement("p");
+  hint.className = "zone-hint";
+  hint.textContent = "Bấm vào khu vực để chọn vé";
+
+  map.append(stage, zoneGrid, hint);
+
+  const ticketContainer = document.getElementById("ticketList");
+  ticketContainer.before(map);
+
+  const zoneButtons = {};
+
+  ticketTypes.forEach(ticket => {
+    const zone = document.createElement("button");
+    zone.type = "button";
+    zone.className = "zone";
+    zone.disabled = Number(ticket.quantity) <= 0;
+
+    const name = document.createElement("strong");
+    name.textContent = ticket.name;
+
+    const price = document.createElement("small");
+    price.textContent = Number(ticket.price) === 0
+      ? "Miễn phí"
+      : money(ticket.price);
+
+    zone.append(name, price);
+    zoneGrid.appendChild(zone);
+    zoneButtons[ticket.id] = zone;
+
+    zone.addEventListener("click", () => {
+      const total = Object.values(selected)
+        .reduce((sum, n) => sum + n, 0);
+
+      if (total >= 10 || selected[ticket.id] >= ticket.quantity) {
+        hint.textContent = "Đã đạt giới hạn số lượng vé.";
+        return;
+      }
+
+      selected[ticket.id]++;
+      update();
+
+      hint.textContent =
+        "Đã chọn khu vực " + ticket.name +
+        " — " + money(ticket.price);
+
+      document.querySelectorAll(".zone").forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+      zone.classList.add("active");
+    });
+  });
+
   const ticketList = document.getElementById("ticketList");
 
   ticketTypes.forEach(ticket => {
@@ -202,11 +266,19 @@
       }
     });
 
+    
     ticketTypes.forEach(ticket => {
-      ticket.controls.plus.disabled =
+      const full =
         selected[ticket.id] >= ticket.quantity ||
         totalTickets >= 10;
+
+      ticket.controls.plus.disabled = full;
+
+      if (zoneButtons[ticket.id]) {
+        zoneButtons[ticket.id].disabled = full;
+      }
     });
+
 
     document.getElementById("totalTickets").textContent = totalTickets;
     document.getElementById("totalPrice").textContent =
