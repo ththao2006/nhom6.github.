@@ -49,7 +49,7 @@
     (event.artistIds || []).includes(artist.id)
   );
 
-  document.title = event.title + " | TrueTicket";
+  document.title = event.title + " | Ticketbox";
 
   root.innerHTML = `
     <section class="hero">
