@@ -1,6 +1,51 @@
 // Dữ liệu demo cho ticketbox. Có thể thay bằng dữ liệu thật của nhóm.
 window.TT_SEED_EVENTS = [
- {id:"ev001",title:"NEON NIGHTS — Music Festival",genre:"Festival",location:"Hà Nội",venue:"Công viên Yên Sở",date:"2026-11-21",time:"18:30",price:450000,free:false,status:"upcoming",organizer:"True Live",artistIds:["ar001","ar002"],image:"https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=85",description:"Một đêm hội tụ âm nhạc điện tử, ánh sáng và những màn trình diễn bùng nổ. Hãy sẵn sàng cho trải nghiệm âm nhạc ngoài trời khó quên.",ticketTypes:[{id:"ga",name:"General Admission",price:450000,quantity:600,seated:false},{id:"vip",name:"VIP Experience",price:950000,quantity:120,seated:false}]},
+ {id:"ev001",title:"NEON NIGHTS — Music Festival",genre:"Festival",location:"Hà Nội",venue:"Công viên Yên Sở",date:"2026-11-21",time:"18:30",price:450000,free:false,status:"upcoming",organizer:"True Live",artistIds:["ar001","ar002"],image:"https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=85",description:"Một đêm hội tụ âm nhạc điện tử, ánh sáng và những màn trình diễn bùng nổ. Hãy sẵn sàng cho trải nghiệm âm nhạc ngoài trời khó quên.",
+ticketTypes: [
+  {
+    id: "svip",
+    name: "SVIP",
+    price: 3500000,
+    quantity: 80,
+    seated: false
+  },
+  {
+    id: "vip-a",
+    name: "VIP A",
+    price: 2800000,
+    quantity: 120,
+    seated: false
+  },
+  {
+    id: "vip-b",
+    name: "VIP B",
+    price: 2400000,
+    quantity: 120,
+    seated: false
+  },
+  {
+    id: "zone-a",
+    name: "Khu A",
+    price: 1600000,
+    quantity: 200,
+    seated: false
+  },
+  {
+    id: "zone-b",
+    name: "Khu B",
+    price: 1200000,
+    quantity: 250,
+    seated: false
+  },
+  {
+    id: "zone-c",
+    name: "Khu C",
+    price: 850000,
+    quantity: 300,
+    seated: false
+  }
+]
+},
  {id:"ev002",title:"The Sound of Us",genre:"Âm nhạc",location:"TP. Hồ Chí Minh",venue:"Nhà thi đấu Phú Thọ",date:"2026-11-28",time:"19:00",price:650000,free:false,status:"upcoming",organizer:"Mellow Production",artistIds:["ar001","ar003"],image:"https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=85",description:"Live concert dành cho những giai điệu gắn kết chúng ta. Không gian sân khấu được thiết kế riêng cho một đêm nhạc nhiều cảm xúc.",ticketTypes:[{id:"standard",name:"Standard",price:650000,quantity:400,seated:true},{id:"premium",name:"Premium Seat",price:1200000,quantity:100,seated:true}]},
  {id:"ev003",title:"Creative Minds Workshop",genre:"Workshop",location:"Hà Nội",venue:"Complex 01, Tây Hồ",date:"2026-11-07",time:"09:00",price:0,free:true,status:"upcoming",organizer:"The Makers Lab",artistIds:["ar004"],image:"https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=85",description:"Một buổi gặp gỡ dành cho những người yêu sáng tạo, chia sẻ ý tưởng, thử nghiệm và kết nối cộng đồng.",ticketTypes:[{id:"free",name:"Vé tham dự",price:0,quantity:80,seated:false}]},
  {id:"ev004",title:"MIDNIGHT: Indie Sessions",genre:"Âm nhạc",location:"Đà Nẵng",venue:"The Workshop Da Nang",date:"2026-12-05",time:"20:00",price:280000,free:false,status:"upcoming",organizer:"Midnight Club",artistIds:["ar002","ar003"],image:"https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=85",description:"Một sân khấu nhỏ cho những âm thanh lớn. Tận hưởng đêm nhạc indie trong không gian gần gũi và giàu năng lượng.",ticketTypes:[{id:"entry",name:"Early Entry",price:280000,quantity:250,seated:false},{id:"backstage",name:"Backstage",price:600000,quantity:40,seated:false}]},
