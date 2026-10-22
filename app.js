@@ -523,22 +523,22 @@ e.ticketTypes.some(t => t.quantity > 0)
   // HOME CATEGORY LINKS
   // =========================================
 
-  $$("[data-home-category]").forEach(link => {
-    link.addEventListener("click", () => {
-      const category = link.dataset.homeCategory;
+  
+$$("[data-home-category]").forEach(link => {
+  link.addEventListener("click", () => {
+    const category = link.dataset.homeCategory;
 
-      activeCategory = category;
+    // Lưu thể loại đã chọn
+    activeCategory = category;
 
-      // Đồng bộ bộ lọc thể loại
-      $("#genreFilter").value = category;
+    // Đồng bộ dropdown Thể loại
+    $("#genreFilter").value = category;
 
-      // Đồng bộ nút danh mục đang chọn
-      $$(".category-chip").forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.category === category
-        );
-      });
+    // Lọc lại danh sách sự kiện
+    renderEvents();
+  });
+});
+
 
       renderEvents();
     });
