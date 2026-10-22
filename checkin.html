@@ -3,127 +3,356 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Check-in vé | Ticketbox Demo</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+  <title>Check-in QR | Ticketbox Demo</title>
+
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --bg: #0b0d12;
+      --panel: #1b222d;
+      --border: #35404d;
+      --green: #b8ff35;
+      --muted: #aab4c1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
+      background: var(--bg);
+      color: white;
       font-family: Arial, sans-serif;
-      background: #0b0d12;
-      color: #fff;
     }
+
     .wrap {
-      max-width: 700px;
-      margin: 50px auto;
-      padding: 20px;
+      max-width: 760px;
+      margin: 35px auto;
+      padding: 18px;
     }
+
     .back {
-      color: #b8ff35;
+      color: var(--green);
       text-decoration: none;
-    }
-    h1 { margin-top: 25px; }
-    .muted { color: #a7afbd; line-height: 1.6; }
-    .panel {
-      background: #202631;
-      padding: 28px;
-      border-radius: 18px;
-      margin-top: 24px;
-      border: 1px solid #353d4a;
-    }
-    label {
-      display: block;
-      margin-bottom: 10px;
       font-weight: bold;
     }
+
+    h1 {
+      margin: 28px 0 12px;
+      font-size: clamp(26px, 5vw, 36px);
+    }
+
+    .muted {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      margin-top: 24px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    .camera-box {
+      position: relative;
+      min-height: 240px;
+      background: #080b10;
+      border: 2px dashed #566474;
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      margin-top: 16px;
+    }
+
+    .camera-box.active {
+      border-color: var(--green);
+    }
+
+    #reader {
+      width: 100%;
+      min-height: 240px;
+    }
+
+    #reader video {
+      width: 100% !important;
+      object-fit: cover;
+    }
+
+    #reader button {
+      background: var(--green);
+      color: #101510;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    #reader select {
+      max-width: 100%;
+      padding: 8px;
+    }
+
+    .camera-placeholder {
+      position: absolute;
+      text-align: center;
+      padding: 20px;
+      pointer-events: none;
+    }
+
+    .camera-placeholder .symbol {
+      font-size: 52px;
+      margin-bottom: 10px;
+    }
+
+    .camera-placeholder p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 11px;
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: var(--green);
+      color: #101510;
+    }
+
+    .secondary {
+      background: #344152;
+      color: white;
+    }
+
+    .status {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .result {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 14px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+      white-space: pre-line;
+    }
+
+    .result.success {
+      display: block;
+      background: #173d28;
+      border: 1px solid #368858;
+      color: #c8ff8c;
+    }
+
+    .result.error {
+      display: block;
+      background: #491f29;
+      border: 1px solid #a54a5b;
+      color: #ffc1c8;
+    }
+
+    .result.info {
+      display: block;
+      background: #1b354d;
+      border: 1px solid #3b729f;
+      color: #d2eaff;
+    }
+
+    .manual-form {
+      margin-top: 15px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
     input {
       width: 100%;
       padding: 14px;
-      border-radius: 10px;
       border: 1px solid #566171;
+      border-radius: 10px;
       background: #10151e;
-      color: #fff;
+      color: white;
       font-size: 16px;
     }
-    button {
-      border: 0;
-      background: #b8ff35;
-      color: #101510;
-      padding: 13px 20px;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 15px;
-    }
-    button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-    .result {
-      display: none;
+
+    .note {
       margin-top: 22px;
-      padding: 18px;
-      border-radius: 12px;
-      line-height: 1.7;
-      overflow-wrap: anywhere;
+      font-size: 13px;
     }
-    .result.success {
-      display: block;
-      background: #173e2a;
-      color: #b8ff35;
-    }
-    .result.error {
-      display: block;
-      background: #481e27;
-      color: #ffb5bd;
-    }
-    .result.info {
-      display: block;
-      background: #1c354d;
-      color: #c5e4ff;
+
+    @media (max-width: 520px) {
+      .panel {
+        padding: 16px;
+      }
+
+      .actions button {
+        flex: 1;
+      }
     }
   </style>
 </head>
+
 <body>
   <main class="wrap">
-    <a href="index.html" class="back">← Trang chủ</a>
 
-    <h1>🎫 Check-in vé DEMO</h1>
+    <a href="index.html" class="back">
+      ← Về trang chủ
+    </a>
+
+    <h1>🎫 Check-in bằng QR</h1>
+
     <p class="muted">
-      Trang dành cho nhân viên kiểm tra vé.
-      Nhập mã token trong QR để xác minh và
-      check-in. Mỗi mã chỉ được sử dụng một lần.
+      Đưa mã QR của khách vào camera.
+      Hệ thống tự kiểm tra vé và ghi nhận check-in.
+      Mỗi vé chỉ được sử dụng một lần.
     </p>
 
     <section class="panel">
-      <form id="checkinForm">
-        <label for="qrToken">Mã QR / Token vé</label>
+
+      <h2>📷 Camera quét QR</h2>
+
+      <div class="camera-box" id="cameraBox">
+
+        <div id="reader"></div>
+
+        <div class="camera-placeholder"
+             id="cameraPlaceholder">
+
+          <div class="symbol">▣</div>
+
+          <p>
+            Nhấn "Bật camera" để bắt đầu quét
+          </p>
+
+        </div>
+
+      </div>
+
+      <div class="actions">
+
+        <button
+          id="startCamera"
+          type="button"
+          class="primary">
+          📷 Bật camera
+        </button>
+
+        <button
+          id="stopCamera"
+          type="button"
+          class="secondary"
+          disabled>
+          Tắt camera
+        </button>
+
+        <button
+          id="nextTicket"
+          type="button"
+          class="primary"
+          disabled>
+          Quét vé tiếp theo →
+        </button>
+
+      </div>
+
+      <div id="cameraStatus"
+           class="status"
+           aria-live="polite">
+        Camera chưa bật.
+      </div>
+
+      <div
+        id="checkinResult"
+        class="result"
+        role="status"
+        aria-live="polite">
+      </div>
+
+    </section>
+
+    <section class="panel">
+
+      <h2>⌨️ Nhập mã dự phòng</h2>
+
+      <p class="muted">
+        Dùng khi camera không hoạt động.
+        Nhập token nằm bên trong QR,
+        không phải mã vé hiển thị trên thẻ.
+      </p>
+
+      <form id="checkinForm" class="manual-form">
+
+        <label for="qrToken">
+          Mã QR token
+        </label>
 
         <input
           id="qrToken"
           type="text"
-          placeholder="Dán mã token của vé vào đây"
+          placeholder="QR-... hoặc token cũ TKT-..."
           autocomplete="off"
           required
         >
 
-        <button type="submit" id="checkinButton">
+        <button
+          id="checkinButton"
+          type="submit"
+          class="primary">
           Xác nhận check-in
         </button>
+
       </form>
 
-      <div id="checkinResult" class="result"
-           aria-live="polite"></div>
     </section>
 
-    <p class="muted">
-      Lưu ý: Đây là hệ thống minh họa sử dụng
-      localStorage. Dữ liệu không tự đồng bộ
-      giữa các trình duyệt hoặc thiết bị.
+    <p class="muted note">
+      DEMO: Dữ liệu vé lưu trong localStorage
+      của trình duyệt hiện tại. Camera có thể
+      đọc QR từ thiết bị khác, nhưng việc xác minh
+      chỉ thành công nếu trình duyệt check-in
+      có dữ liệu vé tương ứng.
     </p>
+
   </main>
 
   <script src="ticket-core.js?v=1"></script>
-  <script src="checkin.js?v=1"></script>
+
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <script src="checkin.js?v=2"></script>
 </body>
 </html>
