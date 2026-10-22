@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vé của tôi | Ticketbox</title>
+  <link rel="icon" href="data:,">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0c0e13;
+      color: #fff;
+      font: 15px/1.6 Arial, sans-serif;
+    }
+
+    .container {
+      width: min(1100px, 92%);
+      margin: auto;
+    }
+
+    header {
+      background: #171b24;
+      border-bottom: 1px solid #303540;
+      padding: 18px 0;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+    }
+
+    a {
+      color: #b8ff35;
+      text-decoration: none;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    h1 { margin: 30px 0 8px; }
+
+    .muted { color: #aeb7c9; }
+
+    .ticket-card {
+      background: #191e28;
+      border: 1px solid #333c4b;
+      border-radius: 16px;
+      margin: 22px 0;
+      overflow: hidden;
+    }
+
+    .ticket-top {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 22px;
+      padding: 20px;
+    }
+
+    .ticket-image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #303540;
+    }
+
+    .ticket-info h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+    }
+
+    .ticket-info p { margin: 7px 0; }
+
+    .ticket-bottom {
+      border-top: 1px dashed #4b5360;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .price {
+      color: #b8ff35;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      background: #23482c;
+      color: #b8ff35;
+      border-radius: 20px;
+      font-size: 12px;
+    }
+
+    .button {
+      display: inline-block;
+      border: 1px solid #b8ff35;
+      background: transparent;
+      color: #b8ff35;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px 5px 5px 0;
+    }
+
+    .button.primary {
+      background: #b8ff35;
+      color: #10140a;
+      font-weight: bold;
+    }
+
+    .empty {
+      background: #191e28;
+      border: 1px solid #333c4b;
+      border-radius: 16px;
+      text-align: center;
+      padding: 55px 20px;
+      margin: 30px 0;
+    }
+
+    .empty h2 { color: #b8ff35; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: #000b;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      z-index: 100;
+    }
+
+    .modal.open { display: flex; }
+
+    .modal-content {
+      width: min(480px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #202631;
+      border: 1px solid #4b5360;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .qr-box {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      background: white;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: #111;
+    }
+
+    .qr-box svg {
+      width: 160px;
+      height: 160px;
+    }
+
+    @media (max-width: 650px) {
+      .ticket-top { grid-template-columns: 1fr; }
+      .ticket-image { height: 220px; }
+      .ticket-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container header-inner">
+      <a href="index.html" class="logo">Ticketbox</a>
+      <a href="index.html">← Trang chủ</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1>🎟️ Vé của tôi</h1>
+    <p class="muted">
+      Quản lý vé điện tử và lịch sử đặt vé của bạn.
+    </p>
+
+    <div id="ticketList">
+      <p class="muted">Đang tải danh sách vé...</p>
+    </div>
+  </main>
+
+  <div class="modal" id="ticketModal">
+    <div class="modal-content">
+      <h2>Vé điện tử demo</h2>
+      <h3 id="modalEvent"></h3>
+      <p id="modalTicket"></p>
+
+      <div class="qr-box" id="ticketQR"></div>
+
+      <p id="modalOrder"></p>
+      <p class="muted">
+        Mã minh họa, không có giá trị check-in thật.
+      </p>
+
+      <button class="button" id="closeModal">
+        Đóng
+      </button>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="my-tickets.js"></script>
+</body>
+</html>
