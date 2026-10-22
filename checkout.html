@@ -7,52 +7,125 @@
   <title>Đặt vé | Ticketbox</title>
   <link rel="icon" href="data:,">
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       background: #0c0e13;
-      color: white;
+      color: #f5f5f5;
       font-family: Arial, sans-serif;
+      line-height: 1.6;
     }
-
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
+    a { color: #b8ff35; text-decoration: none; }
+    .container { width: min(1100px, 92%); margin: auto; }
     header {
       background: #141820;
-      padding: 18px 0;
       border-bottom: 1px solid #303540;
+      padding: 18px 0;
     }
-
     .header-inner {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
-
-    a {
-      color: #b8ff35;
-      text-decoration: none;
+    .logo { font-size: 25px; font-weight: bold; }
+    h1 { margin: 30px 0 20px; }
+    h2 { margin: 0 0 18px; font-size: 21px; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+      gap: 24px;
+      padding-bottom: 60px;
     }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
     .box {
       background: #181c25;
       border: 1px solid #303540;
       border-radius: 16px;
-      padding: 28px;
-      margin-top: 32px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    .muted { color: #abb2bf; }
+    .ticket-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid #343944;
+    }
+    .ticket-row:last-child { border-bottom: none; }
+    .ticket-price { color: #b8ff35; font-weight: bold; }
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+    .quantity button {
+      width: 35px;
+      height: 35px;
+      background: #2b313d;
+      border: 1px solid #4a5260;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 20px;
+    }
+    .quantity button:disabled {
+      opacity: .35;
+      cursor: not-allowed;
+    }
+    .quantity span { min-width: 20px; text-align: center; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input {
+      width: 100%;
+      padding: 13px;
+      background: #10141c;
+      border: 1px solid #434b59;
+      border-radius: 9px;
+      color: white;
+      font-size: 15px;
+    }
+    input:focus { outline: 2px solid #b8ff35; }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 13px 0;
+    }
+    .total {
+      color: #b8ff35;
+      font-size: 26px;
+      font-weight: bold;
+    }
+    .button {
+      width: 100%;
+      padding: 15px;
+      background: #b8ff35;
+      border: none;
+      border-radius: 10px;
+      color: #10140a;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 16px;
+    }
+    .button:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+    }
+    .success { text-align: center; padding: 30px 0; }
+    .success h2 { color: #b8ff35; }
+    .success a { display: inline-block; margin-top: 14px; }
+    .error { color: #ff9090; }
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      .box { padding: 19px; }
+      .ticket-row { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
-
   <header>
     <div class="container header-inner">
       <a href="index.html" class="logo">Ticketbox</a>
@@ -62,9 +135,8 @@
 
   <main class="container">
     <h1>Đặt vé sự kiện</h1>
-
-    <div class="box">
-      <p id="checkoutStatus">Đang tải thông tin đặt vé...</p>
+    <div id="checkoutApp">
+      <p class="muted">Đang tải thông tin đặt vé...</p>
     </div>
   </main>
 
