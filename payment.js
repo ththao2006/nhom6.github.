@@ -1233,8 +1233,9 @@ if (
 
       backLink.style.color = "#27c477";
       back.appendChild(backLink);
+    });
 
-     screen.append(
+screen.append(
   title,
   methodText,
   amount,
@@ -1244,17 +1245,6 @@ if (
   confirmButton,
   confirmMessage
 );
-    });
-
-    screen.append(
-      title,
-      methodText,
-      amount,
-      qr,
-      note,
-      confirmButton,
-      confirmMessage
-    );
 
     result.appendChild(screen);
 
