@@ -527,6 +527,26 @@
 
   const deadlineKey =
     "tt_payment_deadline_" + transactionKey;
+  // Mỗi lượt đặt vé chỉ có một mã giao dịch.
+// Giữ nguyên mã khi kiểm tra lại kết quả thanh toán.
+const paymentTransactionKey =
+  "tt_payment_tx_" + transactionKey +
+  "_" + currentUser.id;
+
+let transactionId = sessionStorage.getItem(
+  paymentTransactionKey
+);
+
+if (!transactionId) {
+  transactionId =
+    "TXN-" + Date.now() + "-" +
+    Math.random().toString(36).slice(2, 9);
+
+  sessionStorage.setItem(
+    paymentTransactionKey,
+    transactionId
+  );
+}
 
   let deadline = Number(
     sessionStorage.getItem(deadlineKey)
@@ -751,6 +771,71 @@ if (ownershipError) return ownershipError;
 
     const confirmMessage = document.createElement("p");
     confirmMessage.className = "message";
+    // Chỉ dùng để mô phỏng các tình huống thanh toán.
+const simulationBox = document.createElement("div");
+
+simulationBox.style.cssText = `
+  margin: 22px auto;
+  padding: 18px;
+  max-width: 450px;
+  text-align: left;
+  background: #222b31;
+  border: 1px solid #40515b;
+  border-radius: 12px;
+`;
+
+const simulationLabel = document.createElement("label");
+
+simulationLabel.textContent =
+  "🧪 Tình huống thanh toán (DEMO)";
+
+simulationLabel.style.cssText = `
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+`;
+
+const simulationSelect = document.createElement("select");
+
+simulationSelect.style.cssText = `
+  width: 100%;
+  padding: 12px;
+  background: #111820;
+  color: white;
+  border: 1px solid #65737d;
+  border-radius: 8px;
+`;
+
+simulationSelect.innerHTML = `
+  <option value="normal">
+    Bình thường — xác minh thành công
+  </option>
+  <option value="uncertain">
+    Lỗi kết nối — chưa xác định kết quả
+  </option>
+`;
+
+const simulationNote = document.createElement("p");
+
+simulationNote.className = "muted";
+simulationNote.style.fontSize = "12px";
+simulationNote.textContent =
+  "Chức năng mô phỏng để minh họa giải pháp xử lý lỗi thanh toán.";
+
+simulationBox.append(
+  simulationLabel,
+  simulationSelect,
+  simulationNote
+);
+
+// Trạng thái đang chờ xác minh.
+let awaitingVerification = false;
+
+simulationSelect.addEventListener("change", () => {
+  if (awaitingVerification) {
+    simulationSelect.value = "uncertain";
+  }
+});
 
     function showConfirmError(message) {
       confirmMessage.textContent = message;
@@ -758,8 +843,67 @@ if (ownershipError) return ownershipError;
     }
 
     // 13. Xác nhận và lưu đơn hàng
-    confirmButton.addEventListener("click", () => {
-      if (completed || expired) return;
+confirmButton.addEventListener("click", () => {
+  if (completed || expired) return;
+
+  // Kiểm tra giao dịch đã hoàn tất trước đó chưa.
+  const existingOrder = readArray("tt_orders").find(
+    order =>
+      order.transactionId === transactionId &&
+      order.status === "paid"
+  );
+
+  if (existingOrder) {
+    confirmButton.disabled = true;
+
+    confirmMessage.textContent =
+      "✓ Giao dịch này đã thành công trước đó. " +
+      "Mã đơn: " + existingOrder.id +
+      ". Không tạo thêm vé mới.";
+
+    confirmMessage.className = "message success";
+
+    return;
+  }
+
+  // Lần đầu giả lập mất kết nối:
+  // chưa xác định được kết quả, chưa tạo đơn hay vé.
+  if (
+    simulationSelect.value === "uncertain" &&
+    !awaitingVerification
+  ) {
+    awaitingVerification = true;
+
+    simulationSelect.disabled = true;
+
+    confirmMessage.textContent =
+      "⏳ Chưa xác định được kết quả thanh toán. " +
+      "Hệ thống đang chờ đối soát. " +
+      "Không thực hiện thanh toán mới.";
+
+    confirmMessage.className = "message";
+
+    confirmMessage.style.color = "#ffd777";
+
+    confirmButton.textContent =
+      "🔄 Kiểm tra lại kết quả giao dịch";
+
+    return;
+  }
+
+  // Lần kiểm tra tiếp theo: mô phỏng cổng thanh toán
+  // đã trả về kết quả thành công.
+  // Phần code lưu đơn và cấp vé bên dưới chỉ chạy
+  // sau khi nhận được kết quả xác minh.
+  if (awaitingVerification) {
+    confirmMessage.textContent =
+      "✓ Đã xác minh giao dịch thành công. " +
+      "Đang hoàn tất đơn hàng...";
+
+    confirmMessage.className = "message success";
+  }
+
+  confirmButton.disabled = true;
 
       const error = validateBeforePayment();
 
@@ -820,8 +964,11 @@ if (ownershipError) return ownershipError;
       }
 
       const order = {
-        id: "ORD-" + Date.now() + "-" +
-          Math.random().toString(36).slice(2, 7),
+  id: "ORD-" + transactionId.slice(4),
+
+  transactionId,
+
+  idempotencyKey: transactionId,
 
         type: isResale ? "resale" : "original",
         resaleId: isResale ? resaleId : null,
@@ -879,9 +1026,17 @@ if (ownershipError) return ownershipError;
 
         const orders = readArray("tt_orders");
 
-        if (orders.some(item => item.id === order.id)) {
-          throw new Error("Đơn hàng đã tồn tại.");
-        }
+if (
+  orders.some(item =>
+    item.id === order.id ||
+    item.transactionId === transactionId
+  )
+) {
+  throw new Error(
+    "Giao dịch đã được xử lý trước đó. " +
+    "Không thể tạo đơn hoặc vé trùng."
+  );
+}
 
         if (isResale) {
           const ownershipError =
@@ -1002,13 +1157,22 @@ if (ownershipError) return ownershipError;
           }
         }
 
-      } catch (error) {
-        showConfirmError(
-          error.message ||
-          "Không thể lưu giao dịch demo."
-        );
-        return;
-      }
+     } catch (error) {
+  showConfirmError(
+    error.message ||
+    "Không thể lưu giao dịch demo."
+  );
+
+  // Cho phép kiểm tra lại khi có lỗi.
+  confirmButton.disabled = false;
+
+  if (awaitingVerification) {
+    confirmButton.textContent =
+      "🔄 Kiểm tra lại giao dịch";
+  }
+
+  return;
+}
 
       completed = true;
       clearInterval(timerInterval);
@@ -1065,14 +1229,16 @@ if (ownershipError) return ownershipError;
       backLink.style.color = "#27c477";
       back.appendChild(backLink);
 
-      screen.append(
-        successTitle,
-        orderInfo,
-        successNote,
-        demoNote,
-        myTickets,
-        back
-      );
+     screen.append(
+  title,
+  methodText,
+  amount,
+  qr,
+  note,
+  simulationBox,
+  confirmButton,
+  confirmMessage
+);
     });
 
     screen.append(
