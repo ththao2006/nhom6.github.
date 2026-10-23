@@ -903,8 +903,6 @@ confirmButton.addEventListener("click", () => {
     confirmMessage.className = "message success";
   }
 
-  confirmButton.disabled = true;
-
       const error = validateBeforePayment();
 
       if (error) {
