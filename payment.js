@@ -844,7 +844,14 @@ simulationSelect.addEventListener("change", () => {
 
     // 13. Xác nhận và lưu đơn hàng
 confirmButton.addEventListener("click", () => {
-  if (completed || expired) return;
+if (completed) return;
+
+if (expired) {
+  showConfirmError(
+    "Đã hết thời gian giữ vé. Vui lòng chọn vé lại."
+  );
+  return;
+}
 
   // Kiểm tra giao dịch đã hoàn tất trước đó chưa.
   const existingOrder = readArray("tt_orders").find(
